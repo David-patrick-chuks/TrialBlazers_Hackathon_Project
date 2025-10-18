@@ -1,9 +1,23 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 1010;
-require('./models/index');
+const PORT = process.env.PORT || 1010;
+const sequelize = require('./database/databases');
 app.use(express.json());
 
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
-});
+
+
+const startServer = async () => {
+    try {
+    await sequelize.authenticate();
+    console.log('Connection to database has been established successfully');
+     app.listen(PORT, () => {
+    console.log(`Server is running on PORT: ${PORT}`);
+});    
+  } catch (error) {
+    console.error(`Unable to connect to the database: ${error.message}`);
+  }
+};
+
+startServer();
