@@ -39,11 +39,4 @@ Object.keys(db).forEach(modelName => {
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
-sequelize
-.authenticate()
-.then(()=>{
-  console.log(`db connected`)
-}).catch((err)=>{
-  console.log(`Error connecting to db : ${err}`)
-})
 module.exports = db;
