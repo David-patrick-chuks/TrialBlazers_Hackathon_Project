@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const { Sequelize, DataTypes, Model, BOOLEAN } = require('sequelize');
 const sequelize = require('../database/databases');
 const ErrandAssignment = require('./errandassignment');
 const Errand = require('./errand');
@@ -17,7 +17,7 @@ User.init(
       firstName: {
         type: DataTypes.STRING,
         allowNull: false,
-        trim: true
+        trim: true,
       },
       lastName: {
         type: DataTypes.STRING,
@@ -40,7 +40,7 @@ User.init(
         allowNull: false
       },
       role:{
-        type: DataTypes.ENUM(['Client', 'Runner', 'Admin']),
+        type: DataTypes.ENUM(['Client', 'Runner']),
         allowNull: false
       },
       profileImage: {
@@ -67,6 +67,14 @@ User.init(
       isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
+      token: {
+        type: DataTypes.STRING,
+        defaultValue: ''
       }
   },
   {

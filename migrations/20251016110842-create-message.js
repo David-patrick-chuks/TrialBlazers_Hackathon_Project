@@ -2,27 +2,20 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('messages', {
+    await queryInterface.createTable('Messages', {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
       },
-      firstName: {
-        type: Sequelize.STRING,
-        allowNull: false
+      senderId: {
+        type: Sequelize.STRING
       },
-      lastName: {
-        type: Sequelize.STRING,
-        allowNull: false
+      receiverId: {
+        type: Sequelize.STRING
       },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      phoneNumber: {
-        type: Sequelize.STRING,
-        allowNull: false
+      text: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -35,6 +28,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('messages');
+    await queryInterface.dropTable('Messages');
   }
 };
