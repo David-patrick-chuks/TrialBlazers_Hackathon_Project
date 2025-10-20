@@ -5,7 +5,24 @@ class Message extends Model {}
 
 Message.init(
   {
-    
+    id: {
+        allowNull: false,
+        primaryKey: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4
+      },
+      senderId: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      receiverId: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      text: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
   },
   {
     // Other model options go here
