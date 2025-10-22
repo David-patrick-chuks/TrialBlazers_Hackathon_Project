@@ -24,7 +24,7 @@ KYC.init(
         allowNull: false
       },
       status: {
-        type: DataTypes.ENUM,
+        type: DataTypes.ENUM(['pending', 'approved', 'rejected']),
         allowNull: false
       },
       rejectionReason: {

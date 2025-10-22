@@ -29,7 +29,7 @@ module.exports = {
         allowNull: false
       },
       paymentStatus: {
-        type: Sequelize.ENUM,
+        type: Sequelize.ENUM(['Pending', 'Paid', 'Failed']),
         allowNull: false
       },
       paymentMethod: {

@@ -27,13 +27,9 @@ User.init(
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        // unique: true,
         lowerCase: true,
         trim: true
-      },
-      phoneNumber: {
-        type: DataTypes.STRING,
-        allowNull: false
       },
       password: {
         type: DataTypes.STRING,
@@ -44,7 +40,11 @@ User.init(
         allowNull: false
       },
       profileImage: {
-        type: DataTypes.STRING
+        type: DataTypes.JSON,
+        defaultValue:{
+          publicId: '',
+          url: ''
+        }
       },
       otp:{
         type: DataTypes.STRING
@@ -54,7 +54,7 @@ User.init(
      },
       isVerified:{
         type: DataTypes.BOOLEAN,
-        default: false
+        defaultValue: false
       },
       rating: {
         type: DataTypes.FLOAT,
@@ -72,10 +72,14 @@ User.init(
         type: DataTypes.BOOLEAN,
         defaultValue: false
       },
+      otpVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
       token: {
         type: DataTypes.STRING,
         defaultValue: ''
-      }
+      },
   },
   {
     sequelize, 

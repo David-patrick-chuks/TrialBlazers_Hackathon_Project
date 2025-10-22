@@ -4,8 +4,28 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 1010;
 const sequelize = require('./database/databases');
-app.use(express.json());
+const userRouter = require('./routes/userRoute');
+const axios = require('axios');
 
+app.use(express.json());
+// app.use(cors({origin: '*'}));
+
+
+app.use('/api/v1/', userRouter);
+
+
+app.use('/', (req, res)=>{
+  res.send('Welcome to ErrandHive Server!')
+})
+
+app.use((error, req, res, next)=>{
+    if(error){
+        return res.status(500).json({
+            message: error.message
+        })
+    }
+    next()
+})
 
 
 const startServer = async () => {
