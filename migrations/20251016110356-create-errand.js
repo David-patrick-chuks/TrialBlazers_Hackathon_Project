@@ -29,7 +29,7 @@ module.exports = {
              allowNull: false
            },
            status:{
-             type: Sequelize.ENUM,
+             type: Sequelize.ENUM(['Open', 'Assigned', 'Completed', 'Cancelled']),
              allowNull: false
            },
            assignedTo: {

@@ -10,60 +10,70 @@ module.exports = {
       },
       firstName: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        trim: true
       },
       lastName: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        trim: true
       },
       email: {
         type: Sequelize.STRING,
-        allowNull: false
-      },
-      phoneNumber: {
-        type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        // unique: true,
+        lowercase: true,
+        trim: true
       },
     password: {
         type: Sequelize.STRING,
         allowNull: false
      },
       role:{
-        type: Sequelize.ENUM(['Client', 'Runner', 'Admin']),
+        type: Sequelize.ENUM(['Client', 'Runner']),
         allowNull: false
      },
      profileImage: {
-        type: Sequelize.STRING,
-        allowNull: false
+     type: Sequelize.JSON,
+      defaultValue:{
+        publicId: '',
+       url: ''
+      }
       },
       otp:{
        type: Sequelize.INTEGER,
-       allowNull: false
       },
       otpExpiredAt: {
-       type: Sequelize.INTEGER,
-       allowNull: false
+       type: Sequelize.DATE,
     },
       isVerified:{
        type: Sequelize.BOOLEAN,
-        default: false,
-        allowNull: false
+        defaultValue: false
      },
       rating: {
         type: Sequelize.FLOAT,
         defaultValue: 0,
-        allowNull: false
       },
      totalJobs: {
         type: Sequelize.INTEGER,
         defaultValue: 0,
-        allowNull: false
       },
       isActive: {
       type: Sequelize.BOOLEAN,
       defaultValue: true,
-      allowNull: false
-          },
+      },
+      isAdmin: {
+       type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      otpVerified: {
+       type: Sequelize.BOOLEAN,
+       defaultValue: false
+      },
+     token: {
+        type: Sequelize.STRING,
+        defaultValue: ''
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
