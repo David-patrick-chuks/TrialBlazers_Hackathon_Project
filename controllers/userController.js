@@ -7,7 +7,6 @@ const { sendMail } = require("../middleware/email");
 const jwt = require('jsonwebtoken');
 const { registerOTP } = require('../utils/otpMail');
 const { forgotHtml } = require('../middleware/forgotMail');
-const { where } = require('sequelize');
 
 
 const toTitleCase = (str) => {
@@ -167,7 +166,7 @@ exports.login = async (req, res) => {
         message: `This email ${checkUser.email} is not verified yet`,
       });
     }
-
+    
     const newUser = {
       id: checkUser.id,
       firstName: checkUser.firstName,
@@ -259,6 +258,7 @@ exports.forgotPassword = async (req, res) => {
     }
 };
 
+
 exports.verifyResetPasswordOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -287,7 +287,6 @@ exports.verifyResetPasswordOtp = async (req, res) => {
 exports.resetPassword = async (req, res) => {
     try {
         const {email, newPassword, confirmPassword} = req.body;
-     
         if (!email || !newPassword || !confirmPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
