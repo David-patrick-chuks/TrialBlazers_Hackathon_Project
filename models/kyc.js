@@ -11,29 +11,75 @@ KYC.init(
         type: DataTypes.UUID,
         defaultValue: UUIDV4
       },
-      runnerId: {
+      userId: {
         type: DataTypes.UUID,
-        references: {model: 'Users', key: 'id'}
+        references: {model: 'Users', key: 'id'},
+        allowNull: false
       },
-      nin: {
+      verificationType: {
+        type: DataTypes.ENUM(['BVN', 'NIN']),
+        allowNull: false
+      },
+      verificationId: {
         type: DataTypes.STRING,
         allowNull: false
+      },
+      firstName: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      lastName: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      middleName: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      dateOfBirth: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
+      phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      gender: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      address: {
+        type: DataTypes.JSONB,
+        allowNull: true
+      },
+      image: {
+        type: DataTypes.TEXT,
+        allowNull: true
       },
       nepaBillUrl: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
+      },
+      validationResults: {
+        type: DataTypes.JSONB,
+        allowNull: true
+      },
+      verificationReference: {
+        type: DataTypes.STRING,
+        allowNull: true
       },
       status: {
-        type: DataTypes.ENUM('pending', 'approved', 'rejected'),
-        allowNull: false
+        type: DataTypes.ENUM(['pending', 'approved', 'rejected', 'verified']),
+        allowNull: false,
+        defaultValue: 'pending'
       },
       rejectionReason: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: true
       },
       reviewedBy: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {model: 'Users', key: 'id'}
       },
       createdAt: {
