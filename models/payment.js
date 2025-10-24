@@ -30,7 +30,7 @@ Payment.init(
         type: DataTypes.STRING
       },
       paymentStatus: {
-        type: DataTypes.ENUM(['Pending', 'Paid', 'Failed']),
+        type: DataTypes.ENUM('Pending', 'Paid', 'Failed'),
         defaultValue: 'Pending'
       },
       paymentMethod: {

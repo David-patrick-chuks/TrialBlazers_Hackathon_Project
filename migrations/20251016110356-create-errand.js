@@ -7,6 +7,7 @@ module.exports = {
              allowNull: false,
              primaryKey: true,
              type: Sequelize.UUID,
+            defaultValue: Sequelize.UUIDV4
            },
            userId: {
              type: Sequelize.UUID,
@@ -29,7 +30,7 @@ module.exports = {
              allowNull: false
            },
            status:{
-             type: Sequelize.ENUM(['Open', 'Assigned', 'Completed', 'Cancelled']),
+             type: Sequelize.ENUM('Open', 'Assigned', 'Completed', 'Cancelled'),
              allowNull: false
            },
            assignedTo: {

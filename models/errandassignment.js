@@ -28,7 +28,7 @@ ErrandAssignment.init(
         allowNull: false,
       },
       status: {
-        type: DataTypes.ENUM(['Pending', 'Accepted', 'Rejected', 'Cancelled']),
+        type: DataTypes.ENUM('Pending', 'Accepted', 'Rejected', 'Cancelled'),
         defaultValue: 'Pending'
       }
   },
