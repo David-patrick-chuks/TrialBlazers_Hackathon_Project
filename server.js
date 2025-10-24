@@ -5,6 +5,8 @@ const app = express();
 const PORT = process.env.PORT || 1010;
 const sequelize = require('./database/databases');
 const userRouter = require('./routes/userRoute');
+const paymentRouter = require('./routes/paymentRoute');
+const kycRouter = require('./routes/kycRoute');
 const axios = require('axios');
 
 app.use(express.json());
@@ -12,6 +14,8 @@ app.use(express.json());
 
 
 app.use('/api/v1/', userRouter);
+app.use('/api/v1/payments', paymentRouter);
+app.use('/api/v1/kyc', kycRouter);
 
 
 app.use('/', (req, res)=>{
