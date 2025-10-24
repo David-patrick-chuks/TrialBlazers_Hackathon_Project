@@ -43,11 +43,11 @@ User.init(
         type: DataTypes.TEXT,
         allowNull: true,
          get() {
-    const rawValue = this.getDataValue('profileImage');
-    return rawValue ? JSON.parse(rawValue) : null;
-  },
-  set(value) {
-    this.setDataValue('profileImage', JSON.stringify(value));
+         const rawValue = this.getDataValue('profileImage');
+         return rawValue ? JSON.parse(rawValue) : null;
+       },
+        set(value) {
+       this.setDataValue('profileImage', JSON.stringify(value));
   }
       },
       otp:{

@@ -37,7 +37,7 @@ const swaggerDefinition = {
       description: 'Development server',
     },
     {
-      url: 'http://localhost:3000',
+      url: 'https://errandhive-project.onrender.com',
       description: 'Production server',
     }
   ],
