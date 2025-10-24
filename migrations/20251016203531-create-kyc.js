@@ -6,7 +6,8 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4
       },
       userId: {
         type: Sequelize.UUID,
@@ -21,7 +22,7 @@ module.exports = {
         allowNull: false
       },
       status: {
-        type: Sequelize.ENUM(['pending', 'approved', 'rejected']),
+        type: Sequelize.ENUM('pending', 'approved', 'rejected'),
         allowNull: false
       },
       rejectionReason: {

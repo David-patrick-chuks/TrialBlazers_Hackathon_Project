@@ -1,4 +1,3 @@
-'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -6,71 +5,67 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4
       },
       firstName: {
         type: Sequelize.STRING,
-        allowNull: false,
-        trim: true
+        allowNull: false
       },
       lastName: {
         type: Sequelize.STRING,
-        allowNull: false,
-        trim: true
+        allowNull: false
       },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        // unique: true,
-        lowercase: true,
-        trim: true
+        unique: true
       },
-    password: {
+      password: {
         type: Sequelize.STRING,
         allowNull: false
-     },
-      role:{
-        type: Sequelize.ENUM(['Client', 'Runner']),
-        allowNull: false
-     },
-     profileImage: {
-     type: Sequelize.JSON,
-      defaultValue:{
-        publicId: '',
-       url: ''
-      }
       },
-      otp:{
-       type: Sequelize.INTEGER,
+      role: {
+        type: Sequelize.ENUM('Client', 'Runner'),
+        allowNull: false
+      },
+      profileImage: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      otp: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
       otpExpiredAt: {
-       type: Sequelize.DATE,
-    },
-      isVerified:{
-       type: Sequelize.BOOLEAN,
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      isVerified: {
+        type: Sequelize.BOOLEAN,
         defaultValue: false
-     },
+      },
       rating: {
         type: Sequelize.FLOAT,
-        defaultValue: 0,
+        defaultValue: 0
       },
-     totalJobs: {
+      totalJobs: {
         type: Sequelize.INTEGER,
-        defaultValue: 0,
+        defaultValue: 0
       },
       isActive: {
-      type: Sequelize.BOOLEAN,
-      defaultValue: true,
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
       },
       isAdmin: {
-       type: Sequelize.BOOLEAN,
+        type: Sequelize.BOOLEAN,
         defaultValue: false
       },
       otpVerified: {
-       type: Sequelize.BOOLEAN,
-       defaultValue: false
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
-     token: {
+      token: {
         type: Sequelize.STRING,
         defaultValue: ''
       },
@@ -82,8 +77,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
+  
     });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Users');
   }

@@ -7,6 +7,7 @@ module.exports = {
               allowNull: false,
               primaryKey: true,
               type: Sequelize.UUID,
+              defaultValue: Sequelize.UUIDV4
             },
             errandId: {
               type: Sequelize.UUID,
@@ -25,7 +26,7 @@ module.exports = {
               allowNull: false,
             },
             status: {
-              type: Sequelize.ENUM(['Pending', 'Accepted', 'Rejected', 'Cancelled']),
+              type: Sequelize.ENUM('Pending', 'Accepted', 'Rejected', 'Cancelled'),
               allowNull: false
             },
       createdAt: {

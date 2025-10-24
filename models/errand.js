@@ -36,7 +36,7 @@ Errand.init(
         allowNull: false
       },
       status:{
-        type: DataTypes.ENUM(['Open', 'Assigned', 'Completed', 'Cancelled']),
+        type: DataTypes.ENUM('Open', 'Assigned', 'Completed', 'Cancelled'),
         defaultValue: 'Open',
         allowNull: false
       },

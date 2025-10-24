@@ -27,7 +27,7 @@ User.init(
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        // unique: true,
+        unique: true,
         lowerCase: true,
         trim: true
       },
@@ -36,15 +36,19 @@ User.init(
         allowNull: false
       },
       role:{
-        type: DataTypes.ENUM(['Client', 'Runner']),
+        type: DataTypes.ENUM('Client', 'Runner'),
         allowNull: false
       },
       profileImage: {
-        type: DataTypes.JSON,
-        defaultValue:{
-          publicId: '',
-          url: ''
-        }
+        type: DataTypes.TEXT,
+        allowNull: true,
+         get() {
+    const rawValue = this.getDataValue('profileImage');
+    return rawValue ? JSON.parse(rawValue) : null;
+  },
+  set(value) {
+    this.setDataValue('profileImage', JSON.stringify(value));
+  }
       },
       otp:{
         type: DataTypes.STRING
