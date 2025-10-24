@@ -23,7 +23,6 @@ module.exports = {
       },
       status: {
         type: Sequelize.ENUM('pending', 'approved', 'rejected'),
-        allowNull: false
       },
       rejectionReason: {
         type: Sequelize.TEXT,

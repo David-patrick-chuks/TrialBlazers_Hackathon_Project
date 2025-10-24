@@ -10,11 +10,13 @@ module.exports = {
       },
       firstName: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        trim: true
       },
       lastName: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        trim: true
       },
       email: {
         type: Sequelize.STRING,
@@ -66,6 +68,21 @@ module.exports = {
         defaultValue: false
       },
       token: {
+        defaultValue: 0,
+      },
+      isActive: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true,
+      },
+      isAdmin: {
+       type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      otpVerified: {
+       type: Sequelize.BOOLEAN,
+       defaultValue: false
+      },
+     token: {
         type: Sequelize.STRING,
         defaultValue: ''
       },
