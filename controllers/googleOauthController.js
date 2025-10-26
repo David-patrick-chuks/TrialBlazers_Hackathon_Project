@@ -47,6 +47,7 @@ passport.use(
             isVerified: profile._json.email_verified,
             password: hashedPassword, // ✅ Hashed password
             role,
+            bio: "No bio yet",   
           });
 
           // ✅ Generate token for new user

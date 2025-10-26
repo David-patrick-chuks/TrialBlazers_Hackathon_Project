@@ -1,5 +1,5 @@
 const userModel = require('../models/users');
-
+const passport = require('passport');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
