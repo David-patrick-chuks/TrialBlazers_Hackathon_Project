@@ -7,6 +7,7 @@ const { sendMail } = require("../middleware/email");
 const jwt = require('jsonwebtoken');
 const { registerOTP } = require('../utils/otpMail');
 const { forgotHtml } = require('../middleware/forgotMail');
+const passport = require('passport');
 
 
 const toTitleCase = (str) => {
@@ -506,3 +507,21 @@ exports.googleAuthLogin = async (req, res) => {
         })
     }
 }
+ exports.auth = (req,res,next)=>{
+  const {role} = req.query;
+  const state = Buffer.from(JSON.stringify({ role })).toString('base64')
+    passport.authenticate("google", {scope: ['profile', 'email'],state})(req,res,next)
+ }
+  exports.user = passport.authenticate("google",{successRedirect:'/success', failureRedirect:'/failure'})
+
+  exports.success = (req,res)=>{
+      res.status(200).json({
+        message:'user authenticated successfully',
+        data:req.user
+      })
+  }
+  exports.failure = (req,res)=>{
+    res.status(401).json({
+      message:'something went wrong'
+    })
+  }

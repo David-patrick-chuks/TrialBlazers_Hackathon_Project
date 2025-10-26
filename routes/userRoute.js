@@ -1,4 +1,4 @@
-const { resendCode, login, register, home, forgotPassword, resetPassword, verifyEmail, verifyResetPasswordOtp, changePassword, getOneUser, getAll, update, deleteUser } = require('../controllers/userController');
+const { resendCode, login, register, home, forgotPassword, resetPassword, verifyEmail, verifyResetPasswordOtp, changePassword, getOneUser, getAll, update, deleteUser, auth, user, success, failure } = require('../controllers/userController');
 const { authenticated } = require('../middleware/authenticate');
 const { registerValidator, verifyValidator } = require('../middleware/validator');
 
@@ -554,6 +554,15 @@ router.post('/reset', resetPassword);
  *                   type: string
  *                   example: Login required
  */
+
+router.get('/google', auth);
+
+router.get('/google/callback', user)
+
+router.get('/success', success)
+
+router.get('/failure', failure)
+
 router.put('/password', authenticated, changePassword);
 
 router.get('/user/:id', getOneUser);

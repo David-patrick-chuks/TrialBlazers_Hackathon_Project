@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./controllers/googleOauthController'); // Google OAuth strategy
 
 const express = require('express');
 const app = express();
@@ -11,8 +12,18 @@ const axios = require('axios');
 const cors = require('cors');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const session = require('express-session')
+const passport = require('passport')
 
 app.use(express.json());
+app.use(session({
+  secret: 'thecat',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(cors({origin: '*'}));
 
 const swaggerDefinition = {
@@ -69,12 +80,12 @@ const swaggerSpec = swaggerJSDoc(options);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
-app.use('/api/v1/', userRouter);
+app.use('/api/v1', userRouter);
 app.use('/api/v1/payments', paymentRouter);
 app.use('/api/v1/kyc', kycRouter);
 
 
-app.use('/', (req, res)=>{
+app.get('/', (req, res)=>{
   res.send('Welcome to ErrandHive Server!')
 })
 
