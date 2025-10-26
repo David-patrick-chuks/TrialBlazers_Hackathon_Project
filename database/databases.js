@@ -8,7 +8,7 @@ const dialect = process.env.SQL_DIALECT
 
 const sequelize = new Sequelize(sqlDb, username, password, {
     host: host,
-    dialect: dialect
+    dialect: "mysql"
 });
 
 
