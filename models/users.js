@@ -50,6 +50,10 @@ User.init(
        this.setDataValue('profileImage', JSON.stringify(value));
   }
       },
+      bio: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
       otp:{
         type: DataTypes.STRING
       },
@@ -91,13 +95,6 @@ User.init(
     timestamps: true
   },
 );
-
-User.hasMany(Errand, {foreignKey: 'userId',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE'
-});
-User.hasMany(ErrandAssignment, {foreignKey: 'runnerId'});
-User.hasMany(Review, {foreignKey: 'reviewerId'});
 
 
 module.exports = User;

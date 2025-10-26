@@ -35,6 +35,10 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true
       },
+        bio: {
+         type: Sequelize.TEXT,
+         allowNull: false,
+      },
       otp: {
         type: Sequelize.STRING,
         allowNull: true
@@ -94,7 +98,6 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-  
     });
   },
 

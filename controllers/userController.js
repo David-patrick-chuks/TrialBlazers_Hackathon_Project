@@ -7,18 +7,7 @@ const { sendMail } = require("../middleware/email");
 const jwt = require('jsonwebtoken');
 const { registerOTP } = require('../utils/otpMail');
 const { forgotHtml } = require('../middleware/forgotMail');
-const passport = require('passport');
-
-
-const toTitleCase = (str) => {
-  if (!str) return '';
-  return str
-    .toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-};
-
-const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
-};
+const { generateToken, toTitleCase } = require('../utils/extras');
 
 
 exports.register = async (req, res) => {
