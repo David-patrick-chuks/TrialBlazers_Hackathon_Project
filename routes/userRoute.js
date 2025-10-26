@@ -555,15 +555,98 @@ router.post('/reset', resetPassword);
  *                   example: Login required
  */
 
+router.put('/password', authenticated, changePassword);
+
+/**
+ * @swagger
+ * /api/v1/google:
+ *   get:
+ *     summary: Redirect user to Google for authentication
+ *     description: Initiates Google OAuth login with a required role query parameter (Client or Runner).
+ *     tags: [Google Auth]
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [Client, Runner]
+ *     responses:
+ *       302:
+ *         description: Redirects to Google OAuth Consent Screen
+ */
 router.get('/google', auth);
 
-router.get('/google/callback', user)
+/**
+ * @swagger
+ * /api/v1/google/callback:
+ *   get:
+ *     summary: Google OAuth Callback
+ *     description: Handles the Google callback after user authentication and redirects to /success or /failure
+ *     tags: [Google Auth]
+ *     responses:
+ *       302:
+ *         description: Redirect to success or failure route
+ */
+router.get('/google/callback', user);
 
-router.get('/success', success)
+/**
+ * @swagger
+ * /api/v1/success:
+ *   get:
+ *     summary: Google Authentication Success
+ *     description: Returns a token and user info after successful Google Login.
+ *     tags: [Google Auth]
+ *     responses:
+ *       200:
+ *         description: Google login success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User authenticated successfully
+ *                 token:
+ *                   type: string
+ *                   example: eyJh...yourToken
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     firstName:
+ *                       type: string
+ *                     lastName:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ */
+router.get('/success', success);
 
-router.get('/failure', failure)
-
-router.put('/password', authenticated, changePassword);
+/**
+ * @swagger
+ * /api/v1/failure:
+ *   get:
+ *     summary: Google Authentication Failed
+ *     description: Returned if Google login fails or is canceled.
+ *     tags: [Google Auth]
+ *     responses:
+ *       401:
+ *         description: Authentication failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: something went wrong
+ */
+router.get('/failure', failure);
 
 router.get('/user/:id', getOneUser);
 

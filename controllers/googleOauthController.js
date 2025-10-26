@@ -1,8 +1,8 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const jwt = require("jsonwebtoken");
-const User = require('../models/users')
- // Sequelize User model
+const bcrypt = require("bcrypt"); // ✅ Bcrypt for hashing
+const User = require('../models/users'); // Sequelize User model
 
 passport.use(
   new GoogleStrategy(
@@ -14,40 +14,60 @@ passport.use(
     },
     async (req, accessToken, refreshToken, profile, done) => {
       try {
-        const state = req.query.state? JSON.parse(Buffer.from(req.query.state, 'base64').toString()) : {};
-        const {role} = state;
+        const state = req.query.state
+          ? JSON.parse(Buffer.from(req.query.state, "base64").toString())
+          : {};
+        const { role } = state;
         let token;
+        let userData;
 
-        // Find user in MySQL
+        // ✅ Find user in database
         let userExist = await User.findOne({
           where: { email: profile._json.email },
         });
 
         if (userExist) {
-          // Only generate JWT
-          token = jwt.sign({ 
-            id: userExist.id 
-        }, process.env.JWT_SECRET_KEY, {
-            expiresIn: "1d",
-          });
-        } 
-        else {
-          // Create a new user in MySQL via Sequelize
-          User = await User.create({
-            
+          // ✅ Generate token for existing user
+          token = jwt.sign(
+            { id: userExist.id },
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: "1d" }
+          );
+
+          userData = userExist;
+        } else {
+          // ✅ Hash password using bcrypt
+          const hashedPassword = await bcrypt.hash("ErrandHive", 10);
+
+          // ✅ Create new user
+          userData = await User.create({
             firstName: profile._json.given_name,
             lastName: profile._json.family_name,
             email: profile._json.email,
             isVerified: profile._json.email_verified,
-            password: "ErrandHive",
-            role // No password because Google login
+            password: hashedPassword, // ✅ Hashed password
+            role,
           });
 
-          token = jwt.sign({ id: User.id }, process.env.JWT_SECRET_KEY, {
-            expiresIn: "1d",
-          });
+          // ✅ Generate token for new user
+          token = jwt.sign(
+            { id: userData.id },
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: "1d" }
+          );
         }
-        return done(null, token);
+
+        // ✅ Return both token + user info
+        return done(null, {
+          token,
+          user: {
+            id: userData.id,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            email: userData.email,
+            role: userData.role,
+          },
+        });
       } catch (error) {
         console.error("Google Login Error:", error);
         return done(error, null);
@@ -56,11 +76,10 @@ passport.use(
   )
 );
 
-
-passport.serializeUser((token, done) => {
-  done(null, token);
+passport.serializeUser((data, done) => {
+  done(null, data);
 });
 
-passport.deserializeUser((token, done) => {
-  done(null, token);
+passport.deserializeUser((data, done) => {
+  done(null, data);
 });

@@ -511,16 +511,46 @@ exports.googleAuthLogin = async (req, res) => {
   const {role} = req.query;
   const state = Buffer.from(JSON.stringify({ role })).toString('base64')
     passport.authenticate("google", {scope: ['profile', 'email'],state})(req,res,next)
-    
- }
-  exports.user = passport.authenticate("google",{successRedirect:'/success', failureRedirect:'/failure'})
 
-  exports.success = (req,res)=>{
-      res.status(200).json({
-        message:'user authenticated successfully',
-        data:req.user
-      })
+ }
+ exports.user = (req, res, next) => {
+  passport.authenticate("google", (err, data) => {
+    if (err || !data) {
+      return res.redirect("/api/v1/failure");
+    }
+
+    // ✅ Save user & token temporarily in session
+    req.session.authData = data;
+
+    return res.redirect("/api/v1/success");
+  })(req, res, next);
+};
+
+
+exports.success = (req, res) => {
+  const authData = req.session.authData;
+
+  if (!authData) {
+    return res.status(400).json({ message: "Token missing" });
   }
+
+  // ✅ Send token & user details
+  res.status(200).json({
+    message: "User authenticated successfully",
+    token: authData.token,
+    user: authData.user,
+  });
+
+  // Optional: Clear session after sending
+  req.session.authData = null;
+};
+
+
+exports.failure = (req, res) => {
+  res.status(401).json({ message: "Authentication failed. Please try again." });
+};
+
+
   exports.failure = (req,res)=>{
     res.status(401).json({
       message:'something went wrong'
