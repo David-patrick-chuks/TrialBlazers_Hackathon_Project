@@ -141,16 +141,3 @@ exports.deletedErrand = async (req,res) => {
 
 
 
-
-
-const express = require('express');
-const router = express.Router();
-const errandController = require('../controllers/errandController');
-
-router.post('/', errandController.createErrand);
-router.get('/', errandController.getAllErrands);
-router.get('/:id', errandController.getErrandById);
-router.put('/:id', errandController.updateErrand);
-router.delete('/:id', errandController.deleteErrand);
-
-module.exports = router;
