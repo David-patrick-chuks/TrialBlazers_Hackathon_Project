@@ -325,7 +325,7 @@ router.get('/', home);
 
 /**
  * @swagger
- * /api/v1/password:
+ * /api/v1/forgot-password:
  *   post:
  *     summary: Request password reset (OTP-based)
  *     description: Sends a one-time password (OTP) to the user's registered email address to initiate a password reset process.
@@ -365,7 +365,7 @@ router.get('/', home);
  *                   type: string
  *                   example: Invalid email address provided
  */
-router.post('/password', forgotPassword);
+router.post('/forgot-password', forgotPassword);
 
 /**
  * @swagger

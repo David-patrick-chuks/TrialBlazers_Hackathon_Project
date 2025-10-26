@@ -66,10 +66,4 @@ Errand.init(
   },
 );
 
-// Errand.belongsTo(User, {foreignKey: 'userId', as: 'poster'});
-Errand.hasMany(ErrandAssignment, {foreignKey: 'errandId'});
-Errand.hasOne(Payment, {foreignKey: 'errandId'});
-Errand.hasOne(Review, {foreignKey: 'errandId'});
-
-
 module.exports = Errand;
