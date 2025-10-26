@@ -511,6 +511,7 @@ exports.googleAuthLogin = async (req, res) => {
   const {role} = req.query;
   const state = Buffer.from(JSON.stringify({ role })).toString('base64')
     passport.authenticate("google", {scope: ['profile', 'email'],state})(req,res,next)
+    
  }
   exports.user = passport.authenticate("google",{successRedirect:'/success', failureRedirect:'/failure'})
 

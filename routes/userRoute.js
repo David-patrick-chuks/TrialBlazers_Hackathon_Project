@@ -569,7 +569,7 @@ router.get('/user/:id', getOneUser);
 
 router.get('/users', getAll);
 
-router.put('/update-profile', update);
+router.put('/update-profile', update );
 
 router.delete('/delete-user', deleteUser);
 

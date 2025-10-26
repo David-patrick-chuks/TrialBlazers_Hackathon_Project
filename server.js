@@ -86,7 +86,7 @@ app.use('/api/v1/kyc', kycRouter);
 
 
 app.get('/', (req, res)=>{
-  res.send('Welcome to ErrandHive Server!')
+  res.send('Welcome to ErrandHive Server! ')
 })
 
 app.use((error, req, res, next)=>{

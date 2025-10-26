@@ -34,6 +34,7 @@ passport.use(
         else {
           // Create a new user in MySQL via Sequelize
           User = await User.create({
+            
             firstName: profile._json.given_name,
             lastName: profile._json.family_name,
             email: profile._json.email,
