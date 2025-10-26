@@ -56,7 +56,6 @@ passport.use(
   )
 );
 
-
 passport.serializeUser((token, done) => {
   done(null, token);
 });
