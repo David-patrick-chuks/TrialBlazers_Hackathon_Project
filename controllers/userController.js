@@ -10,6 +10,7 @@ const { forgotHtml } = require('../middleware/forgotMail');
 const { generateToken, toTitleCase } = require('../utils/extras');
 
 
+
 exports.register = async (req, res) => {
     try {
         const { firstName, lastName, email, password, confirmPassword, role } = req.body;
