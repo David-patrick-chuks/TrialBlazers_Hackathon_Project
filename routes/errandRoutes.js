@@ -11,3 +11,5 @@ router.get('/get/:id', getErrandById);
 router.put('/update/:id',updateErrand);
 
 router.delete('/delete/:id',deletedErrand)
+
+module.exports = router;
