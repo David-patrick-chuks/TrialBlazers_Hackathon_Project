@@ -567,7 +567,7 @@ router.put('/password', authenticated, changePassword);
 
 /**
  * @swagger
- * /user/{id}:
+ * /api/v1/user/{id}:
  *   get:
  *     summary: Get a single user by ID
  *     description: Retrieve a user's information by their unique ID. Password and sensitive fields are excluded from the response.
@@ -634,7 +634,7 @@ router.get('/user/:id', getOneUser);
 
 /**
  * @swagger
- * /users:
+ * /api/v1/users:
  *   get:
  *     summary: Get all users
  *     description: Retrieve all registered users from the database. Passwords and sensitive fields are excluded.
@@ -687,7 +687,7 @@ router.put('/update-profile', update );
 
 /**
  * @swagger
- * /delete-user/{id}:
+ * /api/v1/delete-user/{id}:
  *   delete:
  *     summary: Delete a user by ID
  *     description: Permanently removes a user record from the database by their unique ID.
