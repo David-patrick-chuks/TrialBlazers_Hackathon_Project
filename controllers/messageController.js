@@ -3,24 +3,26 @@ const Message = require('../models/message');
 //chat between logged-in user and another user
 exports.getMessages = async (req, res) => {
   try {
-    const currentUserId = req.user.id; 
-    const otherUserId = req.params.userId; 
+    const currentUserId = String(req.user.id); // ensure string
+    const otherUserId = String(req.params.userId); 
 
+    const messages = await Message.findAll({
+      where: {
+        [Sequelize.Op.or]: [
+          { senderId: currentUserId, receiverId: otherUserId },
+          { senderId: otherUserId, receiverId: currentUserId },
+        ],
+      },
+      order: [['createdAt', 'ASC']]
+    });
 
-    // Fetch both directions
-    const messages = await Message.find({
-      $or: [
-        { senderId: currentUserId, receiverId: otherUserId },
-        { senderId: otherUserId, receiverId: currentUserId },
-      ],
-    }).sort({ createdAt: 1 });
-
-  
     res.status(200).json(messages);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Failed to get messages" });
   }
 };
+
 
 
 // Optional: Send a message (for REST API use)
