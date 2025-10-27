@@ -8,7 +8,6 @@ const jwt = require('jsonwebtoken');
 const { registerOTP } = require('../utils/otpMail');
 const { forgotHtml } = require('../middleware/forgotMail');
 const { generateToken, toTitleCase } = require('../utils/extras');
-const passport = require('passport');
 
 
 
