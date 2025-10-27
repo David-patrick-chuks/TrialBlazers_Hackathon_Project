@@ -8,6 +8,7 @@ const sequelize = require('./database/databases');
 const userRouter = require('./routes/userRoute');
 const paymentRouter = require('./routes/paymentRoute');
 const kycRouter = require('./routes/kycRoute');
+const errand = require('./routes/errandRoutes')
 const axios = require('axios');
 const cors = require('cors');
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -83,6 +84,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/v1', userRouter);
 app.use('/api/v1/payments', paymentRouter);
 app.use('/api/v1/kyc', kycRouter);
+app.use('/api/v1/errand',errand);
 
 
 app.get('/', (req, res)=>{

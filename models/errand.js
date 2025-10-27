@@ -4,6 +4,7 @@ const User = require('./users');
 const ErrandAssignment = require('./errandassignment');
 const Payment = require('./payment');
 const Review = require('./review');
+const { date } = require('joi');
 
 class Errand extends Model {}
 
@@ -24,12 +25,33 @@ Errand.init(
         type: DataTypes.STRING,
         allowNull: false,
       },
+      category:{
+        type: DataTypes.ENUM('accessories','food stuff','medicine','cream'),
+        allowNull:false,
+      
+        
+      },
+     
+      recieverNo:{
+        type:DataTypes.UUID,
+        refrences:{model:'runnerId', key: 'id'}
+      },
+      instruction:{
+        type:DataTypes.TEXT,
+        allowNull:false
+      },
+
       description: {
         type: DataTypes.TEXT,
         allowNull: false,
       },
+      status: {
+        type: DataTypes.ENUM('Pending', 'Accepted', 'Rejected', 'Cancelled'),
+        defaultValue: 'Pending'
+      },
       location: {
         type: DataTypes.STRING,
+        allowNull:false 
       },
       price: {
         type: DataTypes.FLOAT,
