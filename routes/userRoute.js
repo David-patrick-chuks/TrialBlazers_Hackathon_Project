@@ -565,12 +565,165 @@ router.get('/failure', failure)
 
 router.put('/password', authenticated, changePassword);
 
+/**
+ * @swagger
+ * /user/{id}:
+ *   get:
+ *     summary: Get a single user by ID
+ *     description: Retrieve a user's information by their unique ID. Password and sensitive fields are excluded from the response.
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The unique ID of the user.
+ *         schema:
+ *           type: string
+ *           example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *                     firstName:
+ *                       type: string
+ *                       example: John
+ *                     lastName:
+ *                       type: string
+ *                       example: Doe
+ *                     email:
+ *                       type: string
+ *                       example: johndoe@example.com
+ *                     role:
+ *                       type: string
+ *                       example: Client
+ *                     profileImage:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1/profile.jpg
+ *                     rating:
+ *                       type: number
+ *                       example: 4.8
+ *                     totalJobs:
+ *                       type: integer
+ *                       example: 25
+ *       404:
+ *         description: User not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ */
 router.get('/user/:id', getOneUser);
 
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieve all registered users from the database. Passwords and sensitive fields are excluded.
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: A list of all users or an empty message if no users exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: All users present in the database are 5
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *                       firstName:
+ *                         type: string
+ *                         example: John
+ *                       lastName:
+ *                         type: string
+ *                         example: Doe
+ *                       email:
+ *                         type: string
+ *                         example: johndoe@example.com
+ *                       role:
+ *                         type: string
+ *                         example: Client
+ *                       profileImage:
+ *                         type: string
+ *                         example: https://res.cloudinary.com/demo/image/upload/v1/profile.jpg
+ *                       rating:
+ *                         type: number
+ *                         example: 4.7
+ *                       totalJobs:
+ *                         type: integer
+ *                         example: 25
+ */
 router.get('/users', getAll);
 
 router.put('/update-profile', update );
 
-router.delete('/delete-user', deleteUser);
+/**
+ * @swagger
+ * /delete-user/{id}:
+ *   delete:
+ *     summary: Delete a user by ID
+ *     description: Permanently removes a user record from the database by their unique ID.
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: UUID of the user to be deleted
+ *         schema:
+ *           type: string
+ *           example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ */
+router.delete('/delete-user/:id', deleteUser);
+
 
 module.exports = router

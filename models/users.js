@@ -22,7 +22,7 @@ User.init(
       lastName: {
         type: DataTypes.STRING,
         allowNull: false,
-        trim: true
+        trim: true 
       },
       email: {
         type: DataTypes.STRING,
