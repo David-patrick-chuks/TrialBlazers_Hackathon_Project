@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./controllers/googleOauthController')
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
