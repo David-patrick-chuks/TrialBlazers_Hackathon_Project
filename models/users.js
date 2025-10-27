@@ -27,7 +27,7 @@ User.init(
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        // unique: true,
+        unique: true,
         lowerCase: true,
         trim: true
       },
@@ -48,11 +48,11 @@ User.init(
        },
         set(value) {
        this.setDataValue('profileImage', JSON.stringify(value));
-  }
+       }
       },
       bio: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
       otp:{
         type: DataTypes.STRING
