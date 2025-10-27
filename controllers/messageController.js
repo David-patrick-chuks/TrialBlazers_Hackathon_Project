@@ -1,6 +1,7 @@
 const Message = require('../models/message');
+const { Sequelize } = require('sequelize'); // import Sequelize for Op.or
 
-//chat between logged-in user and another user
+// Chat between logged-in user and another user
 exports.getMessages = async (req, res) => {
   try {
     const currentUserId = String(req.user.id); // ensure string
@@ -18,7 +19,7 @@ exports.getMessages = async (req, res) => {
 
     res.status(200).json(messages);
   } catch (err) {
-    console.error(err);
+    console.error(err); // detailed error logging
     res.status(500).json({ message: "Failed to get messages" });
   }
 };
