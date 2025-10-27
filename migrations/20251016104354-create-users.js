@@ -33,7 +33,18 @@ module.exports = {
       },
       profileImage: {
         type: Sequelize.TEXT,
-        allowNull: true
+        allowNull: true,
+        get() {
+         const rawValue = this.getDataValue('profileImage');
+         return rawValue ? JSON.parse(rawValue) : null;
+       },
+        set(value) {
+       this.setDataValue('profileImage', JSON.stringify(value));
+       }
+      },
+        bio: {
+         type: Sequelize.TEXT,
+         allowNull: true,
       },
       otp: {
         type: Sequelize.STRING,
@@ -94,7 +105,6 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-  
     });
   },
 

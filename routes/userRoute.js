@@ -1,4 +1,4 @@
-const { resendCode, login, register, home, forgotPassword, resetPassword, verifyEmail, verifyResetPasswordOtp, changePassword, getOneUser, getAll, update, deleteUser } = require('../controllers/userController');
+const { resendCode, login, register, home, forgotPassword, resetPassword, verifyEmail, verifyResetPasswordOtp, changePassword, getOneUser, getAll, update, deleteUser, auth, user, success, failure } = require('../controllers/userController');
 const { authenticated } = require('../middleware/authenticate');
 const { registerValidator, verifyValidator } = require('../middleware/validator');
 
@@ -325,7 +325,7 @@ router.get('/', home);
 
 /**
  * @swagger
- * /api/v1/password:
+ * /api/v1/forgot-password:
  *   post:
  *     summary: Request password reset (OTP-based)
  *     description: Sends a one-time password (OTP) to the user's registered email address to initiate a password reset process.
@@ -365,7 +365,7 @@ router.get('/', home);
  *                   type: string
  *                   example: Invalid email address provided
  */
-router.post('/password', forgotPassword);
+router.post('/forgot-password', forgotPassword);
 
 /**
  * @swagger
@@ -554,14 +554,259 @@ router.post('/reset', resetPassword);
  *                   type: string
  *                   example: Login required
  */
+
 router.put('/password', authenticated, changePassword);
 
+/**
+ * @swagger
+ * /api/v1/google:
+ *   get:
+ *     summary: Redirect user to Google for authentication
+ *     description: Initiates Google OAuth login with a required role query parameter (Client or Runner).
+ *     tags: [Google Auth]
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [Client, Runner]
+ *     responses:
+ *       302:
+ *         description: Redirects to Google OAuth Consent Screen
+ */
+router.get('/google', auth);
+
+/**
+ * @swagger
+ * /api/v1/google/callback:
+ *   get:
+ *     summary: Google OAuth Callback
+ *     description: Handles the Google callback after user authentication and redirects to /success or /failure
+ *     tags: [Google Auth]
+ *     responses:
+ *       302:
+ *         description: Redirect to success or failure route
+ */
+router.get('/google/callback', user);
+
+/**
+ * @swagger
+ * /api/v1/success:
+ *   get:
+ *     summary: Google Authentication Success
+ *     description: Returns a token and user info after successful Google Login.
+ *     tags: [Google Auth]
+ *     responses:
+ *       200:
+ *         description: Google login success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User authenticated successfully
+ *                 token:
+ *                   type: string
+ *                   example: eyJh...yourToken
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     firstName:
+ *                       type: string
+ *                     lastName:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ */
+router.get('/success', success);
+
+/**
+ * @swagger
+ * /api/v1/failure:
+ *   get:
+ *     summary: Google Authentication Failed
+ *     description: Returned if Google login fails or is canceled.
+ *     tags: [Google Auth]
+ *     responses:
+ *       401:
+ *         description: Authentication failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: something went wrong
+ */
+router.get('/failure', failure);
+
+/**
+ * @swagger
+ * /api/v1/user/{id}:
+ *   get:
+ *     summary: Get a single user by ID
+ *     description: Retrieve a user's information by their unique ID. Password and sensitive fields are excluded from the response.
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The unique ID of the user.
+ *         schema:
+ *           type: string
+ *           example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *                     firstName:
+ *                       type: string
+ *                       example: John
+ *                     lastName:
+ *                       type: string
+ *                       example: Doe
+ *                     email:
+ *                       type: string
+ *                       example: johndoe@example.com
+ *                     role:
+ *                       type: string
+ *                       example: Client
+ *                     profileImage:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1/profile.jpg
+ *                     rating:
+ *                       type: number
+ *                       example: 4.8
+ *                     totalJobs:
+ *                       type: integer
+ *                       example: 25
+ *       404:
+ *         description: User not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ */
 router.get('/user/:id', getOneUser);
 
+/**
+ * @swagger
+ * /api/v1/users:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieve all registered users from the database. Passwords and sensitive fields are excluded.
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: A list of all users or an empty message if no users exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: All users present in the database are 5
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *                       firstName:
+ *                         type: string
+ *                         example: John
+ *                       lastName:
+ *                         type: string
+ *                         example: Doe
+ *                       email:
+ *                         type: string
+ *                         example: johndoe@example.com
+ *                       role:
+ *                         type: string
+ *                         example: Client
+ *                       profileImage:
+ *                         type: string
+ *                         example: https://res.cloudinary.com/demo/image/upload/v1/profile.jpg
+ *                       rating:
+ *                         type: number
+ *                         example: 4.7
+ *                       totalJobs:
+ *                         type: integer
+ *                         example: 25
+ */
 router.get('/users', getAll);
 
-router.put('/update-profile', update);
+router.put('/update-profile', update );
 
-router.delete('/delete-user', deleteUser);
+/**
+ * @swagger
+ * /api/v1/delete-user/{id}:
+ *   delete:
+ *     summary: Delete a user by ID
+ *     description: Permanently removes a user record from the database by their unique ID.
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: UUID of the user to be deleted
+ *         schema:
+ *           type: string
+ *           example: 1d2a3b4c-5d6e-7f8g-9h0i-123456abcdef
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ */
+router.delete('/delete-user/:id', deleteUser);
+
 
 module.exports = router

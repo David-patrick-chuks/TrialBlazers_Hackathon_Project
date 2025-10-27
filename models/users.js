@@ -22,12 +22,12 @@ User.init(
       lastName: {
         type: DataTypes.STRING,
         allowNull: false,
-        trim: true
+        trim: true 
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        // unique: true,
+        unique: true,
         lowerCase: true,
         trim: true
       },
@@ -48,7 +48,11 @@ User.init(
        },
         set(value) {
        this.setDataValue('profileImage', JSON.stringify(value));
-  }
+       }
+      },
+      bio: {
+        type: DataTypes.TEXT,
+        allowNull: true,
       },
       otp:{
         type: DataTypes.STRING
@@ -91,13 +95,6 @@ User.init(
     timestamps: true
   },
 );
-
-User.hasMany(Errand, {foreignKey: 'userId',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE'
-});
-User.hasMany(ErrandAssignment, {foreignKey: 'runnerId'});
-User.hasMany(Review, {foreignKey: 'reviewerId'});
 
 
 module.exports = User;

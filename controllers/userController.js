@@ -1,5 +1,5 @@
 const userModel = require('../models/users');
-
+const passport = require('passport');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
@@ -7,17 +7,8 @@ const { sendMail } = require("../middleware/email");
 const jwt = require('jsonwebtoken');
 const { registerOTP } = require('../utils/otpMail');
 const { forgotHtml } = require('../middleware/forgotMail');
+const { generateToken, toTitleCase } = require('../utils/extras');
 
-
-const toTitleCase = (str) => {
-  if (!str) return '';
-  return str
-    .toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-};
-
-const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
-};
 
 
 exports.register = async (req, res) => {
@@ -364,7 +355,11 @@ exports.changePassword = async (req, res) => {
 exports.getOneUser = async (req, res) => {
     try {
         const userId = req.params.id;
-        const user = await userModel.findOne({attributes:  { exclude: ['password', 'otp', 'otpExpiredAt', 'otpVerified'] }}, {where:{userId}})
+        const user = await userModel.findOne({
+       attributes: { exclude: ['password', 'otp', 'otpExpiredAt', 'otpVerified'] },
+       where: { id: userId },
+      });
+
         if (!user) {
             return res.status(404).json({
                 message: 'User not found'
@@ -384,26 +379,28 @@ exports.getOneUser = async (req, res) => {
 };
 
 exports.getAll = async (req, res) => {
-    try {
-        const allUsers = await userModel.findAll({ attributes: { exclude: ['password', 'otp', 'otpExpiredAt', 'otpVerified'] }});
-        if (allUsers < 1) {
-             res.status(200).json({
-                message: `User's database is empty`
-            })
-        } else {
-            res.status(200).json({
-                message: `All users present in the database are ${allUsers.length}`,
-                data: allUsers
-            });
-        }
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({
-            message: 'Internal Server Error',
-            error: error.message
-        });
+  try {
+    const allUsers = await userModel.findAll({
+      attributes: { exclude: ['password', 'otp', 'otpExpiredAt', 'otpVerified'] }
+    });
+
+    if (allUsers.length < 1) {
+      return res.status(200).json({
+        message: "User's database is empty"
+      });
     }
-}
+    res.status(200).json({
+      message: `All users present in the database are ${allUsers.length}`,
+      data: allUsers
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: error.message
+    });
+  }
+};
 
 exports.update = async (req, res) => {
     try {
@@ -486,23 +483,52 @@ exports.makeAdmin = async (req, res) => {
     }
 };
 
-exports.googleAuthLogin = async (req, res) => {
-    try {
-        const token = await jwt.sign({
-            id: req.user.id,
-            email: req.user.email,
-            isAdmin: req.user.isAdmin
-        }, "secretKey", {expiresIn: "1hr"})
-        // res.redirect('/')
+ exports.auth = (req,res,next)=>{
+  const {role} = req.query;
+  const state = Buffer.from(JSON.stringify({ role })).toString('base64')
+    passport.authenticate("google", {scope: ['profile', 'email'],state})(req,res,next)
 
-        res.status(200).json({
-            message: 'Login successful',
-            data: req.user.fullName,
-            token
-        })
-    } catch (error) {
-        res.status(500).json({
-            message: "Error logging with Google: " + error.message
-        })
+ }
+ exports.user = (req, res, next) => {
+  passport.authenticate("google", (err, data) => {
+    if (err || !data) {
+      return res.redirect("/api/v1/failure");
     }
-}
+
+    // ✅ Save user & token temporarily in session
+    req.session.authData = data;
+
+    return res.redirect("/api/v1/success");
+  })(req, res, next);
+};
+
+
+exports.success = (req, res) => {
+  const authData = req.session.authData;
+
+  if (!authData) {
+    return res.status(400).json({ message: "Token missing" });
+  }
+
+  // ✅ Send token & user details
+  res.status(200).json({
+    message: "User authenticated successfully",
+    token: authData.token,
+    user: authData.user,
+  });
+
+  // Optional: Clear session after sending
+  req.session.authData = null;
+};
+
+
+exports.failure = (req, res) => {
+  res.status(401).json({ message: "Authentication failed. Please try again." });
+};
+
+
+  exports.failure = (req,res)=>{
+    res.status(401).json({
+      message:'something went wrong'
+    })
+  }
