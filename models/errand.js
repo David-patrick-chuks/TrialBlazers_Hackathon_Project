@@ -26,7 +26,7 @@ Errand.init(
         allowNull: false,
       },
       category:{
-        type: DataTypes.ENUM('accessories','food stuff','medicine','cream'),
+        type: DataTypes.ENUM('accessories','food stuff','medicine','cream','electronics','utilities'),
         allowNull:false,
       
         
@@ -45,13 +45,17 @@ Errand.init(
         type: DataTypes.TEXT,
         allowNull: false,
       },
-      status: {
-        type: DataTypes.ENUM('Pending', 'Accepted', 'Rejected', 'Cancelled'),
-        defaultValue: 'Pending'
+     
+     
+      pickupAddress:{
+        type:DataTypes.TEXT,
+        allowNull:false
+
       },
-      location: {
-        type: DataTypes.STRING,
-        allowNull:false 
+      pickupContact:{
+        type:DataTypes.TEXT,
+        allowNull:false,   
+
       },
       price: {
         type: DataTypes.FLOAT,
@@ -81,14 +85,14 @@ Errand.init(
       },
   },
   {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Errands', // We need to choose the model name
+   
+    sequelize,
+    modelName: 'Errands', 
     timestamps: true
   },
 );
 
-// Errand.belongsTo(User, {foreignKey: 'userId', as: 'poster'});
+
 Errand.hasMany(ErrandAssignment, {foreignKey: 'errandId'});
 Errand.hasOne(Payment, {foreignKey: 'errandId'});
 Errand.hasOne(Review, {foreignKey: 'errandId'});

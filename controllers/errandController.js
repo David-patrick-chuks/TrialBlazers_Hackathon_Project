@@ -6,11 +6,11 @@ const {uuiv4} = require('uuid')
 
 exports.createErrand = async (req,res) => {
     try {
-        const {userId,title,category, recieverNo, instruction,description,location,price} = req.body;
+        const {userId,title,category, recieverNo, instruction,description,pickupAddress,pickupContact,price} = req.body;
 
-        if(!userId || !title || !category || !recieverNo ||  !instruction || !description || !location || !price ){
+        if(!userId || !title || !category || !recieverNo ||  !instruction || !description || !pickupAddress || !pickupContact || !price ){
             return res.status(404).json({
-                message: 'missing field is required'
+                message: 'kindly fill the required field'
             })
         }
         const newErrand = await errand.create({
@@ -21,7 +21,8 @@ exports.createErrand = async (req,res) => {
             recieverNo,
             instruction,
             description,
-            location,
+            pickupAddress,
+            pickupContact,
             price
         })
 
@@ -84,7 +85,7 @@ exports.getErrandById = async (req,res) => {
 exports.updateErrand = async (req,res) => {
     try {
         const {id} = req.params;
-        const {assignedTo, status,description,location,price} = req.body;
+        const {assignedTo, status,description,pickupAddress,pickupContact,price} = req.body;
 
         const errand = await errand.findByPK(id);
         if (!errand){
@@ -97,7 +98,9 @@ exports.updateErrand = async (req,res) => {
             status: status || errand.status,
             assignedTo: assignedTo ||errand.assignedTo,
             price: price ||errand.price,
-            location: location || errand.location,
+           
+            pickupAddress: pickupAddress|| errand.pickupAddress,
+            pickupContact: pickupContact|| errand.pickupContact,
             description: description || errand.description,
 
 
