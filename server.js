@@ -1,5 +1,5 @@
 require('dotenv').config();
-require('./controllers/googleOauthController')
+require('./controllers/googleOauthController');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -26,21 +26,9 @@ const io = new Server(server, {
   },
 });
 
-// Listen for connection
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
-
-  // Listen for incoming messages
-  socket.on('send_message', (data) => {
-    // Broadcast the message to everyone including sender
-    io.emit('receive_message', data);
-  });
-
-  // Handle disconnect
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
-  });
-});
+// ✅ Import modular Socket.IO logic
+const initializeChatSocket = require('./sockets/chatSocket');
+initializeChatSocket(io);
 
 // ---- MIDDLEWARES ----
 app.use(express.json());
@@ -65,7 +53,48 @@ app.use('/api/v1', messageRouter);
 // Swagger setup here (as in your current code)
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDefinition = { /* your existing swagger definition */ };
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'ErrandHive API Documentation',
+    version: '1.0.0',
+    description: 'API for ErrandHive web app connecting clients and runners to complete tasks efficiently.',
+    license: {
+      name: 'MIT',
+      url: 'https://spdx.org/licenses/MIT.html',
+    },
+    contact: {
+      name: 'ErrandHive',
+      email: 'errand@gmail.com',
+      url: 'https://trialblazers-hackathon-project.onrender.com',
+    },
+  },
+  servers: [
+    {
+      url: 'http://localhost:1010',
+      description: 'Development server',
+    },
+    {
+      url: 'https://trialblazers-hackathon-project.onrender.com',
+      description: 'Production server',
+    },
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT token in the format: **Bearer <token>**',
+      },
+    },
+  },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+};
 const options = { swaggerDefinition, apis: ['./routes/*.js'] };
 const swaggerSpec = swaggerJSDoc(options);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
