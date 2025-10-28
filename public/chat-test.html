@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Private Chat Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body style="font-family:sans-serif; margin:40px;">
+  <h2>Private Chat Test</h2>
+
+  <label>JWT Token:</label><br />
+  <input id="token" type="text" placeholder="Paste your JWT token" style="width: 80%;" /><br /><br />
+
+  <label>Your ID (Sender):</label><br />
+  <input id="senderId" type="text" placeholder="e.g. user123" /><br /><br />
+
+  <label>Receiver ID:</label><br />
+  <input id="receiverId" type="text" placeholder="e.g. user456" /><br /><br />
+
+  <button id="connectBtn">Connect to Chat</button><br /><br />
+
+  <div id="chatBox" style="display:none;">
+    <h3>Chat Room</h3>
+    <div id="messages" style="border:1px solid #aaa; height:200px; overflow:auto; padding:10px; margin-bottom:10px;"></div>
+    <input id="messageInput" type="text" placeholder="Type your message..." style="width:70%;" />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <script>
+    let socket;
+
+    document.getElementById('connectBtn').addEventListener('click', () => {
+      const token = document.getElementById('token').value.trim();
+      const senderId = document.getElementById('senderId').value.trim();
+      const receiverId = document.getElementById('receiverId').value.trim();
+
+      if (!token || !senderId || !receiverId) {
+        alert("Please fill in token, senderId, and receiverId");
+        return;
+      }
+
+      // Connect to socket with auth token
+      socket = io("http://localhost:1010", {
+        auth: { token }
+      });
+
+      socket.on("connect", () => {
+        console.log("Connected as:", senderId);
+        socket.emit("join_room", { senderId, receiverId });
+        document.getElementById('chatBox').style.display = "block";
+      });
+
+      socket.on("receive_message", (msg) => {
+        const msgBox = document.getElementById('messages');
+        const newMsg = document.createElement('div');
+        newMsg.textContent = `${msg.senderId}: ${msg.text}`;
+        msgBox.appendChild(newMsg);
+        msgBox.scrollTop = msgBox.scrollHeight;
+      });
+
+      socket.on("disconnect", () => {
+        alert("Disconnected from server");
+      });
+
+      document.getElementById('sendBtn').addEventListener('click', () => {
+        const text = document.getElementById('messageInput').value.trim();
+        if (text) {
+          socket.emit("send_message", { senderId, receiverId, text });
+          document.getElementById('messageInput').value = "";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
