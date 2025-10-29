@@ -68,7 +68,7 @@ const swaggerDefinition = {
     },
     contact: {
       name: 'ErrandHive',
-      email: 'errand@gmail.com',
+      email: 'errandhiveg@gmail.com',
       url: 'https://errandhive-project.onrender.com',
     },
   },
