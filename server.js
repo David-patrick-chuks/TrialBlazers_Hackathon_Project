@@ -78,7 +78,7 @@ const swaggerDefinition = {
       description: 'Development server',
     },
     {
-      url: ' ',
+      url: ' https://errandhive-project.onrender.com',
       description: 'Production server',
     },
   ],
