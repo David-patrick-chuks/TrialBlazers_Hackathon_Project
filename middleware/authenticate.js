@@ -26,4 +26,16 @@ exports.authenticated = async (req, res, next) => {
             error: error.message
         })
     }
+};
+
+exports.isAdmin =  async (req, res,next) => {
+    const id = req.user;
+    const user = await userModel.findByPk(id);
+    if (user.isAdmin !== true) { 
+         res.status(403).json({
+            message: "You're not authorized perform this action q3werty"
+        })
+    } else {
+        next()
+    }
 }

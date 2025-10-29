@@ -1,244 +1,113 @@
-const {
-    verifyBVN,
-    verifyNIN,
-    getKYCStatus,
-    getKYCById,
-    updateKYCStatus,
-    getAllKYCRecords,
-    isValidBVN,
-    isValidNIN
-} = require('../services/kyc');
+const KYC = require('../models/kyc');
+const User = require('../models/users'); 
+const cloudinary = require('../config/cloudinary')
+const fs = require('fs');
 
-const verifyUserBVN = async (req, res) => {
-    try {
-        const { bvn, nepaBillUrl, validation } = req.body;
-        const userId = req.user.id;
+exports.submitKYC = async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-        const bvnData = {
-            userId,
-            bvn,
-            nepaBillUrl,
-            validation
-        };
-
-        const result = await verifyBVN(bvnData);
-
-        res.status(201).json({
-            success: true,
-            message: 'BVN verification completed successfully',
-            data: result
-        });
-
-    } catch (error) {
-        console.error('Error verifying BVN:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+    const existingKYC = await KYC.findOne({ where: { userId } });
+    if (existingKYC) {
+      return res.status(400).json({ message: 'KYC already submitted for this user' });
     }
+
+    const { governmentIdCard, proofOfAddressImage, selfieWithIdCard } = req.files;
+
+    if (!governmentIdCard || !proofOfAddressImage || !selfieWithIdCard) {
+      return res.status(400).json({ message: 'All three documents are required' });
+    }
+
+    // Upload to Cloudinary one by one
+    const uploadToCloudinary = async (file) => {
+      const result = await cloudinary.uploader.upload(file.path, { folder: 'kyc_uploads' });
+      fs.unlinkSync(file.path); 
+      return result.secure_url; 
+    };
+
+    const governmentIdCardUrl = await uploadToCloudinary(governmentIdCard[0]);
+    const proofOfAddressUrl = await uploadToCloudinary(proofOfAddressImage[0]);
+    const selfieWithIdUrl = await uploadToCloudinary(selfieWithIdCard[0]);
+
+    // Save to DB
+    const newKYC = await KYC.create({
+      userId,
+      governmentIdCard: governmentIdCardUrl,
+      proofOfAddressImage: proofOfAddressUrl,
+      selfieWithIdCard: selfieWithIdUrl,
+      status: 'pending',
+    });
+
+    res.status(201).json({
+      message: 'KYC submitted successfully. Awaiting review.',
+      data: newKYC,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: error.message,
+    });
+  }
 };
 
-const verifyUserNIN = async (req, res) => {
-    try {
-        const { nin, nepaBillUrl, validation } = req.body;
-        const userId = req.user.id;
+// Get KYC Status
+exports.getMyKYC = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const kyc = await KYC.findOne({ where: { userId } });
 
-        const ninData = {
-            userId,
-            nin,
-            nepaBillUrl,
-            validation
-        };
-
-        const result = await verifyNIN(ninData);
-
-        res.status(201).json({
-            success: true,
-            message: 'NIN verification completed successfully',
-            data: result
-        });
-
-    } catch (error) {
-        console.error('Error verifying NIN:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+    if (!kyc) {
+      return res.status(404).json({ message: 'KYC not found' });
     }
+
+    res.status(200).json({
+      message: 'Fetched KYC details successfully',
+      data: kyc,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
 };
 
-const getUserKYCStatus = async (req, res) => {
-    try {
-        const userId = req.user.id;
+// Admin Get All KYC Submissions 
+exports.getAllKYC = async (req, res) => {
+  try {
+    const kycs = await KYC.findAll({
+      include: [{ model: User, attributes: ['id', 'fullName', 'email'] }],
+      order: [['createdAt', 'DESC']],
+    });
 
-        const result = await getKYCStatus(userId);
-
-        res.status(200).json({
-            success: true,
-            message: 'KYC status retrieved successfully',
-            data: result
-        });
-
-    } catch (error) {
-        console.error('Error getting KYC status:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
+    res.status(200).json({
+      message: 'Fetched all KYC submissions successfully',
+      data: kycs,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
 };
 
-const getKYCByIdController = async (req, res) => {
-    try {
-        const { kycId } = req.params;
+// Admin Update KYC Status
+exports.updateKYCStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; 
 
-        const result = await getKYCById(kycId);
-
-        res.status(200).json({
-            success: true,
-            message: 'KYC record retrieved successfully',
-            data: result
-        });
-
-    } catch (error) {
-        console.error('Error getting KYC by ID:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+    if (!['approved', 'rejected', 'verified'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid KYC status' });
     }
-};
 
-const updateKYCStatusController = async (req, res) => {
-    try {
-        const { kycId } = req.params;
-        const { status, rejectionReason } = req.body;
-        const reviewedBy = req.user.id;
-
-        const result = await updateKYCStatus(kycId, status, rejectionReason, reviewedBy);
-
-        res.status(200).json({
-            success: true,
-            message: 'KYC status updated successfully',
-            data: result
-        });
-
-    } catch (error) {
-        console.error('Error updating KYC status:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+    const kyc = await KYC.findByPk(id);
+    if (!kyc) {
+      return res.status(404).json({ message: 'KYC not found' });
     }
-};
 
-const getAllKYCRecordsController = async (req, res) => {
-    try {
-        const { 
-            status, 
-            verificationType, 
-            dateFrom, 
-            dateTo, 
-            limit, 
-            offset 
-        } = req.query;
+    await kyc.update({ status, reviewedBy: req.user.id });
 
-        const filters = {};
-        if (status) filters.status = status;
-        if (verificationType) filters.verificationType = verificationType;
-        if (dateFrom) filters.dateFrom = dateFrom;
-        if (dateTo) filters.dateTo = dateTo;
-        if (limit) filters.limit = parseInt(limit);
-        if (offset) filters.offset = parseInt(offset);
-
-        const result = await getAllKYCRecords(filters);
-
-        res.status(200).json({
-            success: true,
-            message: 'KYC records retrieved successfully',
-            data: result
-        });
-
-    } catch (error) {
-        console.error('Error getting all KYC records:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-const validateBVNFormat = async (req, res) => {
-    try {
-        const { bvn } = req.body;
-
-        if (!bvn) {
-            return res.status(400).json({
-                success: false,
-                message: 'BVN is required'
-            });
-        }
-
-        const isValid = isValidBVN(bvn);
-
-        res.status(200).json({
-            success: true,
-            message: 'BVN validation completed',
-            data: {
-                bvn,
-                isValid,
-                format: isValid ? 'Valid 11-digit BVN format' : 'Invalid BVN format'
-            }
-        });
-
-    } catch (error) {
-        console.error('Error validating BVN format:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-const validateNINFormat = async (req, res) => {
-    try {
-        const { nin } = req.body;
-
-        if (!nin) {
-            return res.status(400).json({
-                success: false,
-                message: 'NIN is required'
-            });
-        }
-
-        const isValid = isValidNIN(nin);
-
-        res.status(200).json({
-            success: true,
-            message: 'NIN validation completed',
-            data: {
-                nin,
-                isValid,
-                format: isValid ? 'Valid 11-digit NIN format' : 'Invalid NIN format'
-            }
-        });
-
-    } catch (error) {
-        console.error('Error validating NIN format:', error);
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-module.exports = {
-    verifyUserBVN,
-    verifyUserNIN,
-    getUserKYCStatus,
-    getKYCByIdController,
-    updateKYCStatusController,
-    getAllKYCRecordsController,
-    validateBVNFormat,
-    validateNINFormat
+    res.status(200).json({
+      message: `KYC ${status} successfully`,
+      data: kyc,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
 };

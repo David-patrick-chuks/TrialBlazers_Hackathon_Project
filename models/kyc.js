@@ -1,102 +1,79 @@
 const { Sequelize, DataTypes, Model, UUIDV4 } = require('sequelize');
-const sequelize = require('../database/databases')
+const sequelize = require('../database/databases');
 
 class KYC extends Model {}
 
 KYC.init(
   {
     id: {
-        allowNull: false,
-        primaryKey: true,
-        type: DataTypes.UUID,
-        defaultValue: UUIDV4
+      allowNull: false,
+      primaryKey: true,
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'id',
       },
-      userId: {
-        type: DataTypes.UUID,
-        references: {model: 'Users', key: 'id'},
-        allowNull: false
+      onDelete: 'CASCADE', // ensures KYC is deleted if user is removed
+      onUpdate: 'CASCADE',
+    },
+    governmentIdCard: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      get() {
+        const rawValue = this.getDataValue('governmentIdCard');
+        return rawValue ? JSON.parse(rawValue) : null;
       },
-      verificationType: {
-        type: DataTypes.ENUM(['BVN', 'NIN']),
-        allowNull: false
+      set(value) {
+        this.setDataValue('governmentIdCard', JSON.stringify(value));
       },
-      verificationId: {
-        type: DataTypes.STRING,
-        allowNull: false
+    },
+    proofOfAddressImage: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      get() {
+        const rawValue = this.getDataValue('proofOfAddressImage');
+        return rawValue ? JSON.parse(rawValue) : null;
       },
-      firstName: {
-        type: DataTypes.STRING,
-        allowNull: true
+      set(value) {
+        this.setDataValue('proofOfAddressImage', JSON.stringify(value));
       },
-      lastName: {
-        type: DataTypes.STRING,
-        allowNull: true
+    },
+    selfieWithIdCard: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      get() {
+        const rawValue = this.getDataValue('selfieWithIdCard');
+        return rawValue ? JSON.parse(rawValue) : null;
       },
-      middleName: {
-        type: DataTypes.STRING,
-        allowNull: true
+      set(value) {
+        this.setDataValue('selfieWithIdCard', JSON.stringify(value));
       },
-      dateOfBirth: {
-        type: DataTypes.DATE,
-        allowNull: true
-      },
-      phoneNumber: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      gender: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      address: {
-        type: DataTypes.JSONB,
-        allowNull: true
-      },
-      image: {
-        type: DataTypes.TEXT,
-        allowNull: true
-      },
-      nepaBillUrl: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      validationResults: {
-        type: DataTypes.JSONB,
-        allowNull: true
-      },
-      verificationReference: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      status: {
-        type: DataTypes.ENUM(['pending', 'approved', 'rejected', 'verified']),
-        allowNull: false,
-        defaultValue: 'pending'
-      },
-      rejectionReason: {
-        type: DataTypes.TEXT,
-        allowNull: true
-      },
-      reviewedBy: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {model: 'Users', key: 'id'}
-      },
-      createdAt: {
-        allowNull: false,
-        type: DataTypes.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: DataTypes.DATE
-      }
+    },
+    status: {
+      type: DataTypes.ENUM('pending', 'approved', 'rejected', 'verified'),
+      allowNull: false,
+      defaultValue: 'pending',
+    },
+    reviewedBy: {
+      type: DataTypes.UUID,
+      allowNull: true, // could reference an admin or system user
+      references: {
+        model: 'Users',
+        key: 'id',
+    },
   },
+},
   {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'KYCs', // We need to choose the model name
-    timestamps: true
-  },
+    sequelize,
+    modelName: 'KYC',
+    tableName: 'KYCs',
+    timestamps: true,
+  }
 );
 
 module.exports = KYC;

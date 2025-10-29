@@ -1,6 +1,7 @@
-const { resendCode, login, register, home, forgotPassword, resetPassword, verifyEmail, verifyResetPasswordOtp, changePassword, getOneUser, getAll, update, deleteUser, auth, user, success, failure } = require('../controllers/userController');
+const { resendCode, login, register, home, forgotPassword, resetPassword, verifyEmail, verifyResetPasswordOtp, changePassword, getOneUser, getAll, update, deleteUser, auth, user, success, failure, makeAdmin } = require('../controllers/userController');
 const { authenticated } = require('../middleware/authenticate');
 const { registerValidator, verifyValidator } = require('../middleware/validator');
+const upload = require('../middleware/multer');
 
 const router = require('express').Router();
 
@@ -45,7 +46,7 @@ const router = require('express').Router();
  *               role:
  *                 type: string
  *                 enum: [Client, Runner]
- *                 example: Client
+ *                 example: Client/Runner
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -74,7 +75,7 @@ const router = require('express').Router();
  *                       example: tonyfasube@example.com
  *                     role:
  *                       type: string
- *                       example: user
+ *                       example: Client/Runner
  *                 token:
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -766,7 +767,78 @@ router.get('/user/:id', getOneUser);
  */
 router.get('/users', getAll);
 
-router.put('/update-profile', update );
+/**
+ * @swagger
+ * /api/v1/update/{id}:
+ *   put:
+ *     summary: Update a user's profile information
+ *     description: Allows a user to update their first name, last name, or profile picture. Requires authentication.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the user to update
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 example: Bukunmi
+ *               lastName:
+ *                 type: string
+ *                 example: Fasube
+ *               profileImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: Upload a new profile image (optional)
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 9e0e3e3c-5a41-4f5a-8f32-bb47d6b8f01d
+ *                     firstName:
+ *                       type: string
+ *                       example: Bukunmi
+ *                     lastName:
+ *                       type: string
+ *                       example: Fasube
+ *                     profileImage:
+ *                       type: object
+ *                       properties:
+ *                         publicId:
+ *                           type: string
+ *                           example: profile_pics/abc123
+ *                         Url:
+ *                           type: string
+ *                           example: https://res.cloudinary.com/demo/image/upload/v123456/profile_pics/abc123.jpg
+ *       400:
+ *         description: Invalid input or missing required fields
+ *       404:
+ *         description: User not found
+ */
+router.put('/update/:id', upload.single('profileImage'), authenticated, update);
+
 
 /**
  * @swagger
@@ -807,6 +879,32 @@ router.put('/update-profile', update );
  *                   example: User not found
  */
 router.delete('/delete-user/:id', deleteUser);
+
+/**
+ * @swagger
+ * /api/v1/make-admin/{id}:
+ *   put:
+ *     summary: Promote a user to admin
+ *     description: Updates a user's `isAdmin` status to true.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the user to promote
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User promoted to admin successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put('/make-admin', makeAdmin)
 
 
 module.exports = router
