@@ -45,7 +45,7 @@ const router = require('express').Router();
  *               role:
  *                 type: string
  *                 enum: [Client, Runner]
- *                 example: user
+ *                 example: Client
  *     responses:
  *       201:
  *         description: User registered successfully

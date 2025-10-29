@@ -14,6 +14,7 @@ const paymentRouter = require('./routes/paymentRoute');
 const kycRouter = require('./routes/kycRoute');
 const errandRouter = require('./routes/errandRoutes');
 const messageRouter = require('./routes/messageRouter');
+const applicationRouter = require('./routes/applicationRoute');
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +50,8 @@ app.use('/api/v1/payments', paymentRouter);
 app.use('/api/v1/kyc', kycRouter);
 app.use('/api/v1/errand', errandRouter);
 app.use('/api/v1', messageRouter);
+app.use('/api/v1', applicationRouter);
+
 
 // Swagger setup here (as in your current code)
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -71,11 +74,11 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: 'http://localhost:1010',
+      url: 'http://localhost:8080',
       description: 'Development server',
     },
     {
-      url: 'https://trialblazers-hackathon-project.onrender.com',
+      url: 'https://errandhive-project.onrender.com',
       description: 'Production server',
     },
   ],
