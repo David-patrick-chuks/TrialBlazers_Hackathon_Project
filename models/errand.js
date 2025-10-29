@@ -1,9 +1,5 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../database/databases');
-const User = require('./users');
-const ErrandAssignment = require('./errandassignment');
-const Payment = require('./payment');
-const Review = require('./review');
 const { date } = require('joi');
 
 class Errand extends Model {}
@@ -25,28 +21,21 @@ Errand.init(
         type: DataTypes.STRING,
         allowNull: false,
       },
-      
       recieverNo:{
         type:DataTypes.UUID,
         refrences:{model:'runnerId', key: 'id'}
       },
-    
-
       description: {
         type: DataTypes.TEXT,
         allowNull: false,
       },
-     
-     
       pickupAddress:{
         type:DataTypes.TEXT,
-        allowNull:false
-
+        allowNull:false,
       },
       pickupContact:{
         type:DataTypes.TEXT,
-        allowNull:false,   
-
+        allowNull:false,
       },
       price: {
         type: DataTypes.FLOAT,
@@ -83,11 +72,6 @@ Errand.init(
   },
 );
 
-
-
-Errand.hasMany(ErrandAssignment, {foreignKey: 'errandId'});
-Errand.hasOne(Payment, {foreignKey: 'errandId'});
-Errand.hasOne(Review, {foreignKey: 'errandId'});
 
 
 module.exports = Errand;

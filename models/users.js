@@ -1,8 +1,6 @@
 const { Sequelize, DataTypes, Model, BOOLEAN } = require('sequelize');
 const sequelize = require('../database/databases');
-const ErrandAssignment = require('./errandassignment');
-const Errand = require('./errand');
-const Review = require('./review');
+
 
 class User extends Model {}
 

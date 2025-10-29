@@ -169,7 +169,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: checkUser.id },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "5m" }
+      { expiresIn: "1d" }
     );
 
     res.status(200).json({
@@ -495,7 +495,6 @@ exports.makeAdmin = async (req, res) => {
       return res.redirect("/api/v1/failure");
     }
 
-    // ✅ Save user & token temporarily in session
     req.session.authData = data;
 
     return res.redirect("/api/v1/success");
@@ -510,14 +509,12 @@ exports.success = (req, res) => {
     return res.status(400).json({ message: "Token missing" });
   }
 
-  // ✅ Send token & user details
   res.status(200).json({
     message: "User authenticated successfully",
     token: authData.token,
     user: authData.user,
   });
 
-  // Optional: Clear session after sending
   req.session.authData = null;
 };
 
