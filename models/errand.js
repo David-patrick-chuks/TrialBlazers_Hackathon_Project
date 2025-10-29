@@ -33,6 +33,10 @@ Errand.init(
         type:DataTypes.TEXT,
         allowNull:false,
       },
+      deliveryAddress:{
+        type:DataTypes.TEXT,
+        allowNull:false,
+      },
       pickupContact:{
         type:DataTypes.TEXT,
         allowNull:false,
@@ -63,6 +67,17 @@ Errand.init(
       deliveryOTPExpires: {
         type: DataTypes.STRING,
       },
+      attachments: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+         get() {
+         const rawValue = this.getDataValue('attachments');
+         return rawValue ? JSON.parse(rawValue) : null;
+       },
+        set(value) {
+       this.setDataValue('attachments', JSON.stringify(value));
+       }
+      }
   },
   {
    
