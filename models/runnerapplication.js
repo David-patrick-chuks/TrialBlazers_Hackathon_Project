@@ -9,7 +9,7 @@ RunnerApplication.init(
      primaryKey: true,
       allowNull: false,
       type: DataTypes.UUID,
-      defaultValue: UUIDV4
+      defaultValue: DataTypes.UUIDV4
     },
   runnerId: {
      type: DataTypes.UUID,

@@ -14,7 +14,7 @@ const {
 
 const initializePayment = async (req, res) => {
     try {
-        const { receiverId, amount, description, payer } = req.body;
+        const { receiverId, amount, description } = req.body;
         const payerId = req.user.id;
 
         const paymentData = {
