@@ -88,7 +88,7 @@ const swaggerDefinition = {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Enter JWT token in the format: **Bearer <token>**',
+        description: 'Enter your JWT token in the format: **Bearer <token>**',
       },
     },
   },

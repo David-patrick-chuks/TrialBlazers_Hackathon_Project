@@ -1,26 +1,41 @@
 const errand = require('../models/errand')
 const user = require('../models/users')
+const cloudinary = require('../config/cloudinary')
+const fs = require('fs')
 
 exports.createErrand = async (req, res) => {
     try {
 
-        const {userId,title, recieverNo, description,pickupAddress,pickupContact,price} = req.body;
+        const {title, description,pickupAddress,deliveryAddress,pickupContact,price} = req.body;
+        const file = req.file
 
-        if(!userId || !title ||!recieverNo ||  !description || !pickupAddress || !pickupContact || !price ){
+
+        if(!title ||  !description || !pickupAddress || !deliveryAddress || !pickupContact || !price ){
 
             return res.status(404).json({
                 message: 'kindly fill the required field'
             })
         }
+        const cloudAttachments = await cloudinary.uploader.upload(file.path,{
+            folder: 'attachments',
+            public_id: `${id}-${Date.now()}`,
+            overWrite: true,
+        });
+       fs.unlinkSync(file.path)
+
+        const Image = {
+           publicId: result.public_id,
+           url: result.secure_url,
+        }
         const newErrand = await errand.create({
             
-            userId,
             title,
-            recieverNo,
             description,
             pickupAddress,
+            deliveryAddress,
             pickupContact,
-            price
+            price,
+            attachments : Image
         })
 
         res.status(200).json({
