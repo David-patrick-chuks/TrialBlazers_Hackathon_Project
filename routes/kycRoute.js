@@ -1,633 +1,255 @@
+const router = require('express').Router();
+const upload = require('../middleware/multer');
+const { authenticated, isAdmin } = require('../middleware/authenticate');
 const {
-    verifyUserBVN,
-    verifyUserNIN,
-    getUserKYCStatus,
-    getKYCByIdController,
-    updateKYCStatusController,
-    getAllKYCRecordsController,
-    validateBVNFormat,
-    validateNINFormat
+  submitKYC,
+  getMyKYC,
+  getAllKYC,
+  updateKYCStatus,
 } = require('../controllers/kycController');
 
-const router = require('express').Router();
-
-
 /**
  * @swagger
- * /api/v1/kyc/verify/bvn:
+ * /api/v1/kyc/submit:
  *   post:
- *     summary: Verify user with BVN
- *     description: Initiates BVN (Bank Verification Number) verification for user identity validation.
+ *     summary: Submit KYC documents
+ *     description: Allows an authenticated user to submit KYC documents (Government ID, Proof of Address, and Selfie with ID). All three images are required.
  *     tags: [KYC]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
- *               - bvn
+ *               - governmentIdCard
+ *               - proofOfAddressImage
+ *               - selfieWithIdCard
  *             properties:
- *               bvn:
+ *               governmentIdCard:
  *                 type: string
- *                 pattern: '^[0-9]{11}$'
- *                 description: 11-digit Bank Verification Number
- *                 example: "12345678901"
- *               nepaBillUrl:
+ *                 format: binary
+ *                 description: Upload government-issued ID card
+ *               proofOfAddressImage:
  *                 type: string
- *                 format: uri
- *                 description: URL to NEPA bill for address verification
- *                 example: "https://example.com/nepa-bill.pdf"
- *               validation:
- *                 type: object
- *                 description: Additional validation data
- *                 properties:
- *                   firstName:
- *                     type: string
- *                     example: "John"
- *                   lastName:
- *                     type: string
- *                     example: "Doe"
- *                   dateOfBirth:
- *                     type: string
- *                     format: date
- *                     example: "1990-01-01"
+ *                 format: binary
+ *                 description: Upload proof of address (e.g. utility bill)
+ *               selfieWithIdCard:
+ *                 type: string
+ *                 format: binary
+ *                 description: Upload a selfie holding your ID card
  *     responses:
  *       201:
- *         description: BVN verification initiated successfully
+ *         description: KYC submitted successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: "BVN verification completed successfully"
- *                 data:
- *                   type: object
- *                   properties:
- *                     kycId:
- *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
- *                     verificationType:
- *                       type: string
- *                       example: "BVN"
- *                     verificationId:
- *                       type: string
- *                       example: "12345678901"
- *                     status:
- *                       type: string
- *                       enum: [pending, approved, rejected, verified]
- *                       example: "pending"
- *                     verificationReference:
- *                       type: string
- *                       example: "BVN_VER_20241201_001"
- *                     userDetails:
- *                       type: object
- *                       properties:
- *                         firstName:
- *                           type: string
- *                           example: "John"
- *                         lastName:
- *                           type: string
- *                           example: "Doe"
- *                         dateOfBirth:
- *                           type: string
- *                           format: date
- *                           example: "1990-01-01"
- *                         phoneNumber:
- *                           type: string
- *                           example: "+2348012345678"
- *       400:
- *         description: Bad request - Invalid BVN or missing required fields
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Invalid BVN format or BVN already verified"
- *       401:
- *         description: Unauthorized - Invalid or missing token
- */
-router.post('/verify/bvn', verifyUserBVN);
-
-/**
- * @swagger
- * /api/v1/kyc/verify/nin:
- *   post:
- *     summary: Verify user with NIN
- *     description: Initiates NIN (National Identification Number) verification for user identity validation.
- *     tags: [KYC]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - nin
- *             properties:
- *               nin:
- *                 type: string
- *                 pattern: '^[0-9]{11}$'
- *                 description: 11-digit National Identification Number
- *                 example: "12345678901"
- *               nepaBillUrl:
- *                 type: string
- *                 format: uri
- *                 description: URL to NEPA bill for address verification
- *                 example: "https://example.com/nepa-bill.pdf"
- *               validation:
- *                 type: object
- *                 description: Additional validation data
- *                 properties:
- *                   firstName:
- *                     type: string
- *                     example: "John"
- *                   lastName:
- *                     type: string
- *                     example: "Doe"
- *                   dateOfBirth:
- *                     type: string
- *                     format: date
- *                     example: "1990-01-01"
- *     responses:
- *       201:
- *         description: NIN verification initiated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "NIN verification completed successfully"
- *                 data:
- *                   type: object
- *                   properties:
- *                     kycId:
- *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
- *                     verificationType:
- *                       type: string
- *                       example: "NIN"
- *                     verificationId:
- *                       type: string
- *                       example: "12345678901"
- *                     status:
- *                       type: string
- *                       enum: [pending, approved, rejected, verified]
- *                       example: "pending"
- *                     verificationReference:
- *                       type: string
- *                       example: "NIN_VER_20241201_001"
- *                     userDetails:
- *                       type: object
- *                       properties:
- *                         firstName:
- *                           type: string
- *                           example: "John"
- *                         lastName:
- *                           type: string
- *                           example: "Doe"
- *                         middleName:
- *                           type: string
- *                           example: "Michael"
- *                         dateOfBirth:
- *                           type: string
- *                           format: date
- *                           example: "1990-01-01"
- *                         gender:
- *                           type: string
- *                           example: "Male"
- *                         address:
- *                           type: object
- *                           properties:
- *                             state:
- *                               type: string
- *                               example: "Lagos"
- *                             lga:
- *                               type: string
- *                               example: "Ikeja"
- *       400:
- *         description: Bad request - Invalid NIN or missing required fields
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Invalid NIN format or NIN already verified"
- *       401:
- *         description: Unauthorized - Invalid or missing token
- */
-router.post('/verify/nin', verifyUserNIN);
-
-/**
- * @swagger
- * /api/v1/kyc/status:
- *   get:
- *     summary: Get user KYC status
- *     description: Retrieves the current KYC verification status for the authenticated user.
- *     tags: [KYC]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: KYC status retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "KYC status retrieved successfully"
- *                 data:
- *                   type: object
- *                   properties:
- *                     userId:
- *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
- *                     overallStatus:
- *                       type: string
- *                       enum: [not_verified, pending, verified, rejected]
- *                       example: "verified"
- *                     verificationLevel:
- *                       type: string
- *                       enum: [none, basic, advanced, full]
- *                       example: "full"
- *                     kycRecords:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                             format: uuid
- *                             example: "123e4567-e89b-12d3-a456-426614174000"
- *                           verificationType:
- *                             type: string
- *                             enum: [BVN, NIN]
- *                             example: "BVN"
- *                           status:
- *                             type: string
- *                             enum: [pending, approved, rejected, verified]
- *                             example: "verified"
- *                           createdAt:
- *                             type: string
- *                             format: date-time
- *                             example: "2024-12-01T10:30:00Z"
- *                           updatedAt:
- *                             type: string
- *                             format: date-time
- *                             example: "2024-12-01T11:00:00Z"
- *                     requirements:
- *                       type: object
- *                       properties:
- *                         bvnRequired:
- *                           type: boolean
- *                           example: true
- *                         ninRequired:
- *                           type: boolean
- *                           example: true
- *                         nepaBillRequired:
- *                           type: boolean
- *                           example: true
- *       401:
- *         description: Unauthorized - Invalid or missing token
- *       404:
- *         description: User not found
- */
-router.get('/status', getUserKYCStatus);
-
-/**
- * @swagger
- * /api/v1/kyc/records/{kycId}:
- *   get:
- *     summary: Get KYC record by ID
- *     description: Retrieves detailed information about a specific KYC verification record.
- *     tags: [KYC]
- *     parameters:
- *       - in: path
- *         name: kycId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: KYC record ID
- *         example: "123e4567-e89b-12d3-a456-426614174000"
- *     responses:
- *       200:
- *         description: KYC record retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "KYC record retrieved successfully"
+ *                   example: KYC submitted successfully. Awaiting review.
  *                 data:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       example: 82b7e6c0-1a25-4b9f-b2b4-93495b5c5221
  *                     userId:
  *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
- *                     verificationType:
+ *                       example: 45b6e63a-12b8-44e0-a3b9-9f11462b1234
+ *                     governmentIdCard:
  *                       type: string
- *                       enum: [BVN, NIN]
- *                       example: "BVN"
- *                     verificationId:
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/gov_id.jpg
+ *                     proofOfAddressImage:
  *                       type: string
- *                       example: "12345678901"
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/address_proof.jpg
+ *                     selfieWithIdCard:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/selfie_id.jpg
  *                     status:
  *                       type: string
- *                       enum: [pending, approved, rejected, verified]
- *                       example: "verified"
- *                     firstName:
- *                       type: string
- *                       example: "John"
- *                     lastName:
- *                       type: string
- *                       example: "Doe"
- *                     middleName:
- *                       type: string
- *                       example: "Michael"
- *                     dateOfBirth:
- *                       type: string
- *                       format: date
- *                       example: "1990-01-01"
- *                     phoneNumber:
- *                       type: string
- *                       example: "+2348012345678"
- *                     gender:
- *                       type: string
- *                       example: "Male"
- *                     address:
- *                       type: object
- *                       properties:
- *                         state:
- *                           type: string
- *                           example: "Lagos"
- *                         lga:
- *                           type: string
- *                           example: "Ikeja"
- *                         street:
- *                           type: string
- *                           example: "123 Main Street"
- *                     image:
- *                       type: string
- *                       format: uri
- *                       example: "https://example.com/user-photo.jpg"
- *                     nepaBillUrl:
- *                       type: string
- *                       format: uri
- *                       example: "https://example.com/nepa-bill.pdf"
- *                     validationResults:
- *                       type: object
- *                       properties:
- *                         isVerified:
- *                           type: boolean
- *                           example: true
- *                         confidence:
- *                           type: number
- *                           example: 0.95
- *                         matchedFields:
- *                           type: array
- *                           items:
- *                             type: string
- *                           example: ["firstName", "lastName", "dateOfBirth"]
- *                     verificationReference:
- *                       type: string
- *                       example: "BVN_VER_20241201_001"
- *                     rejectionReason:
- *                       type: string
- *                       example: null
- *                     reviewedBy:
- *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2024-12-01T10:30:00Z"
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2024-12-01T11:00:00Z"
+ *                       example: pending
  *       400:
- *         description: Bad request - Invalid KYC ID
+ *         description: Missing documents or KYC already submitted
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Invalid KYC record ID"
- *       404:
- *         description: KYC record not found
+ *                   example: All three documents are required
+ *       401:
+ *         description: Unauthorized — user not authenticated
+ *       500:
+ *         description: Internal Server Error
  */
-router.get('/records/:kycId', getKYCByIdController);
+router.post(
+  '/submit', authenticated, upload.fields([
+    { name: 'governmentIdCard', maxCount: 1 },
+    { name: 'proofOfAddressImage', maxCount: 1 },
+    { name: 'selfieWithIdCard', maxCount: 1 },
+  ]),
+  submitKYC
+);
 
 /**
  * @swagger
- * /api/v1/kyc/records:
+ * /api/v1/kyc/my:
  *   get:
- *     summary: Get all KYC records
- *     description: Retrieves all KYC verification records with optional filtering (Admin endpoint).
+ *     summary: Get logged-in user's KYC details
+ *     description: Fetches the KYC details of the currently authenticated user.
  *     tags: [KYC]
- *     parameters:
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [pending, approved, rejected, verified]
- *         description: Filter by KYC status
- *         example: "pending"
- *       - in: query
- *         name: verificationType
- *         schema:
- *           type: string
- *           enum: [BVN, NIN]
- *         description: Filter by verification type
- *         example: "BVN"
- *       - in: query
- *         name: dateFrom
- *         schema:
- *           type: string
- *           format: date
- *         description: Start date for filtering (YYYY-MM-DD)
- *         example: "2024-11-01"
- *       - in: query
- *         name: dateTo
- *         schema:
- *           type: string
- *           format: date
- *         description: End date for filtering (YYYY-MM-DD)
- *         example: "2024-12-01"
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 20
- *         description: Number of records to return
- *         example: 20
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *           minimum: 0
- *           default: 0
- *         description: Number of records to skip
- *         example: 0
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: KYC records retrieved successfully
+ *         description: Fetched KYC details successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: "KYC records retrieved successfully"
+ *                   example: Fetched KYC details successfully
  *                 data:
  *                   type: object
  *                   properties:
- *                     records:
- *                       type: array
- *                       items:
+ *                     id:
+ *                       type: string
+ *                       example: 3e5a8c6f-0c1b-4e9b-9af1-bbce74b23412
+ *                     userId:
+ *                       type: string
+ *                       example: 12b4f7c1-8a91-4e32-8c5b-ff37d55ab012
+ *                     governmentIdCard:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/gov_id.jpg
+ *                     proofOfAddressImage:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/address_proof.jpg
+ *                     selfieWithIdCard:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/selfie_id.jpg
+ *                     status:
+ *                       type: string
+ *                       example: pending
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2025-10-28T12:34:56.000Z
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2025-10-29T10:15:23.000Z
+ *       404:
+ *         description: KYC not found for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: KYC not found
+ *       401:
+ *         description: Unauthorized — missing or invalid token
+ */
+router.get('/my', authenticated, getMyKYC);
+
+/**
+ * @swagger
+ * /kyc:
+ *   get:
+ *     summary: Get all KYC submissions (Admin only)
+ *     description: Fetch all user KYC submissions, including basic user details. Accessible only by admins.
+ *     tags: [KYC]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Fetched all KYC submissions successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Fetched all KYC submissions successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 8f2dca3b-4f1a-48b3-bf23-cb7831f3e37a
+ *                       userId:
+ *                         type: string
+ *                         example: 7e1b25f0-87f3-4dbf-8b4b-5e6fcb7cced9
+ *                       governmentIdCard:
+ *                         type: string
+ *                         example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/gov_id.jpg
+ *                       proofOfAddressImage:
+ *                         type: string
+ *                         example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/address_proof.jpg
+ *                       selfieWithIdCard:
+ *                         type: string
+ *                         example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/selfie_id.jpg
+ *                       status:
+ *                         type: string
+ *                         enum: [pending, approved, rejected, verified]
+ *                         example: pending
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2025-10-28T12:34:56.000Z
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2025-10-29T10:15:23.000Z
+ *                       User:
  *                         type: object
  *                         properties:
  *                           id:
  *                             type: string
- *                             format: uuid
- *                             example: "123e4567-e89b-12d3-a456-426614174000"
- *                           userId:
+ *                             example: 7e1b25f0-87f3-4dbf-8b4b-5e6fcb7cced9
+ *                           fullName:
  *                             type: string
- *                             format: uuid
- *                             example: "123e4567-e89b-12d3-a456-426614174000"
- *                           verificationType:
+ *                             example: John Doe
+ *                           email:
  *                             type: string
- *                             enum: [BVN, NIN]
- *                             example: "BVN"
- *                           verificationId:
- *                             type: string
- *                             example: "12345678901"
- *                           status:
- *                             type: string
- *                             enum: [pending, approved, rejected, verified]
- *                             example: "pending"
- *                           firstName:
- *                             type: string
- *                             example: "John"
- *                           lastName:
- *                             type: string
- *                             example: "Doe"
- *                           createdAt:
- *                             type: string
- *                             format: date-time
- *                             example: "2024-12-01T10:30:00Z"
- *                           updatedAt:
- *                             type: string
- *                             format: date-time
- *                             example: "2024-12-01T11:00:00Z"
- *                     pagination:
- *                       type: object
- *                       properties:
- *                         total:
- *                           type: integer
- *                           example: 150
- *                         limit:
- *                           type: integer
- *                           example: 20
- *                         offset:
- *                           type: integer
- *                           example: 0
- *                         hasMore:
- *                           type: boolean
- *                           example: true
- *                     summary:
- *                       type: object
- *                       properties:
- *                         totalRecords:
- *                           type: integer
- *                           example: 150
- *                         pendingCount:
- *                           type: integer
- *                           example: 25
- *                         verifiedCount:
- *                           type: integer
- *                           example: 100
- *                         rejectedCount:
- *                           type: integer
- *                           example: 25
- *       400:
- *         description: Bad request - Invalid query parameters
+ *                             example: johndoe@example.com
+ *       401:
+ *         description: Unauthorized — missing or invalid token
+ *       403:
+ *         description: Forbidden — user is not an admin
+ *       500:
+ *         description: Internal Server Error
  */
-router.get('/records', getAllKYCRecordsController);
+router.get('/', authenticated, isAdmin, getAllKYC);
 
 /**
  * @swagger
- * /api/v1/kyc/records/{kycId}/status:
+ * /api/v1/kyc/{id}/status:
  *   put:
- *     summary: Update KYC status
- *     description: Updates the status of a KYC verification record (Admin only).
+ *     summary: Update KYC status (Admin only)
+ *     description: Allows an admin to update a user's KYC verification status (approved, rejected, or verified).
  *     tags: [KYC]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: kycId
+ *       - name: id
+ *         in: path
  *         required: true
+ *         description: The ID of the KYC record to update.
  *         schema:
  *           type: string
- *           format: uuid
- *         description: KYC record ID
- *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *           example: 8f2dca3b-4f1a-48b3-bf23-cb7831f3e37a
  *     requestBody:
  *       required: true
  *       content:
@@ -640,12 +262,7 @@ router.get('/records', getAllKYCRecordsController);
  *               status:
  *                 type: string
  *                 enum: [approved, rejected, verified]
- *                 description: New status for the KYC record
- *                 example: "approved"
- *               rejectionReason:
- *                 type: string
- *                 description: Reason for rejection (required if status is rejected)
- *                 example: "Document quality is poor"
+ *                 example: approved
  *     responses:
  *       200:
  *         description: KYC status updated successfully
@@ -654,214 +271,48 @@ router.get('/records', getAllKYCRecordsController);
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: "KYC status updated successfully"
+ *                   example: KYC approved successfully
  *                 data:
  *                   type: object
  *                   properties:
  *                     id:
  *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       example: 8f2dca3b-4f1a-48b3-bf23-cb7831f3e37a
+ *                     userId:
+ *                       type: string
+ *                       example: 7e1b25f0-87f3-4dbf-8b4b-5e6fcb7cced9
+ *                     governmentIdCard:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/gov_id.jpg
+ *                     proofOfAddressImage:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/address_proof.jpg
+ *                     selfieWithIdCard:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/demo/image/upload/v1234567/kyc_uploads/selfie_id.jpg
  *                     status:
  *                       type: string
- *                       enum: [approved, rejected, verified]
- *                       example: "approved"
- *                     rejectionReason:
- *                       type: string
- *                       example: null
+ *                       example: approved
  *                     reviewedBy:
  *                       type: string
- *                       format: uuid
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       example: 1bcb0a62-89f2-4a9e-9b5c-937c6a71e1e4
  *                     updatedAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-12-01T11:00:00Z"
+ *                       example: 2025-10-29T10:15:23.000Z
  *       400:
- *         description: Bad request - Invalid status or missing rejection reason
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Rejection reason is required when status is rejected"
+ *         description: Invalid KYC status
  *       401:
- *         description: Unauthorized - Invalid or missing token
+ *         description: Unauthorized — missing or invalid token
  *       403:
- *         description: Forbidden - Admin access required
+ *         description: Forbidden — user is not an admin
  *       404:
- *         description: KYC record not found
+ *         description: KYC not found
+ *       500:
+ *         description: Internal Server Error
  */
-router.put('/records/:kycId/status', updateKYCStatusController);
-
-/**
- * @swagger
- * /api/v1/kyc/validate/bvn:
- *   post:
- *     summary: Validate BVN format
- *     description: Validates the format of a Bank Verification Number without performing full verification.
- *     tags: [KYC]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - bvn
- *             properties:
- *               bvn:
- *                 type: string
- *                 description: Bank Verification Number to validate
- *                 example: "12345678901"
- *     responses:
- *       200:
- *         description: BVN validation completed
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "BVN validation completed"
- *                 data:
- *                   type: object
- *                   properties:
- *                     bvn:
- *                       type: string
- *                       example: "12345678901"
- *                     isValid:
- *                       type: boolean
- *                       example: true
- *                     format:
- *                       type: string
- *                       example: "Valid 11-digit BVN format"
- *                     checksum:
- *                       type: boolean
- *                       example: true
- *                     description:
- *                       type: string
- *                       example: "BVN format is valid and ready for verification"
- *       400:
- *         description: Bad request - BVN is required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "BVN is required"
- *                 data:
- *                   type: object
- *                   properties:
- *                     bvn:
- *                       type: string
- *                       example: ""
- *                     isValid:
- *                       type: boolean
- *                       example: false
- *                     format:
- *                       type: string
- *                       example: "Invalid BVN format"
- */
-router.post('/validate/bvn', validateBVNFormat);
-
-/**
- * @swagger
- * /api/v1/kyc/validate/nin:
- *   post:
- *     summary: Validate NIN format
- *     description: Validates the format of a National Identification Number without performing full verification.
- *     tags: [KYC]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - nin
- *             properties:
- *               nin:
- *                 type: string
- *                 description: National Identification Number to validate
- *                 example: "12345678901"
- *     responses:
- *       200:
- *         description: NIN validation completed
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "NIN validation completed"
- *                 data:
- *                   type: object
- *                   properties:
- *                     nin:
- *                       type: string
- *                       example: "12345678901"
- *                     isValid:
- *                       type: boolean
- *                       example: true
- *                     format:
- *                       type: string
- *                       example: "Valid 11-digit NIN format"
- *                     checksum:
- *                       type: boolean
- *                       example: true
- *                     description:
- *                       type: string
- *                       example: "NIN format is valid and ready for verification"
- *       400:
- *         description: Bad request - NIN is required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "NIN is required"
- *                 data:
- *                   type: object
- *                   properties:
- *                     nin:
- *                       type: string
- *                       example: ""
- *                     isValid:
- *                       type: boolean
- *                       example: false
- *                     format:
- *                       type: string
- *                       example: "Invalid NIN format"
- */
-router.post('/validate/nin', validateNINFormat);
+router.put('/:id/status', authenticated, isAdmin, updateKYCStatus);
 
 module.exports = router;

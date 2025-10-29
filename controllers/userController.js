@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
             password: hashPassword,
             role,
             otp: otp,
-            otpExpiredAt: Date.now() + 1000 * 120
+            otpExpiredAt: Date.now() + 1000 * 300
         });
        
         const subject = "Email Verification";
@@ -56,7 +56,7 @@ exports.register = async (req, res) => {
         }
         res.status(201).json({
             message: "User registered successfully",
-            verify_account: `Click on Verification link sent to ${user.email}`,
+            verify_account: `Enter the OTP sent to ${user.email} for Email verification`,
             data: newUser,
             token
         })
@@ -120,7 +120,7 @@ exports.resendCode = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const resendOtp = {
          otp: otp, 
-         otpExpiredAt: Date.now() + 1000 * 120 
+         otpExpiredAt: Date.now() + 1000 * 300
     }
     await userModel.update(resendOtp, {where: {email: email.toLowerCase().trim()}});
 
@@ -186,38 +186,6 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.home = async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ message: "Login required. No token provided." });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, result) => {
-      if (err) {
-        return res.status(401).json({ message: "Invalid or expired token", error: err.message });
-      }
-
-      const checkUser = await userModel.findByPk(result.id);
-      if (!checkUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      res.status(200).json({
-        message: `Welcome ${checkUser.lastName}, we are happy to have you here`,
-      });
-    });
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({
-      message: "Internal Server Error",
-      error: error.message,
-    });
-  }
-};
-
 exports.forgotPassword = async (req, res) => {
     try {
         const {email} = req.body;
@@ -231,7 +199,7 @@ exports.forgotPassword = async (req, res) => {
         
         const forgotOtp = {
          otp: otp, 
-         otpExpiredAt: Date.now() + 1000 * 240
+         otpExpiredAt: Date.now() + 1000 * 300
          }
          await userModel.update(forgotOtp, {where: {email: email.toLowerCase().trim()}});
 
@@ -248,7 +216,6 @@ exports.forgotPassword = async (req, res) => {
         })  
     }
 };
-
 
 exports.verifyResetPasswordOtp = async (req, res) => {
   try {
@@ -403,44 +370,51 @@ exports.getAll = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-    try {
-        const { firstName, lastName } = req.body;
-        const { id } = req.params;
-        const file = req.file;
-        let response;
-        const user = await userModel.findByPk(id);
+  try {
+    const { firstName, lastName } = req.body;
+    const { id } = req.params;
+    const file = req.file;
 
-        if (!user) {
-            return res.status(404).json({message: 'User not found'});
-        };
-
-        console.log(file);
-            console.log('path: ', file.path);
-        if (file && file.path) {
-            response = await cloudinary.uploader.upload(file.path)
-            fs.unlinkSync(file.path)
-        }
-        const userData = {
-            firstName: firstName ?? user.firstName,
-            lastName: lastName ?? user.lastName,
-            profileImage: {
-                publicId: response?.public_id,
-                Url: response?.secure_url,
-                
-            }
-        };
-        const newData = Object.assign(user, userData);
-        const update = await userModel.update(newData, { where: {id} });
-        res.status(200).json({
-            message: 'User updated successfully',
-            data: update
-        })
-    } catch (error) {
-        res.status(500).json({
-            message: 'Internal Server Error',
-            error: error.message
-        });
+    const user = await userModel.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    let profileImage = user.profileImage;
+
+    if (file && file.path) {
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: 'user_profiles',
+        public_id: `${id}-${Date.now()}`,
+        overwrite: true,
+      });
+      fs.unlinkSync(file.path); 
+
+      profileImage = {
+        publicId: result.public_id,
+        url: result.secure_url,
+      };
+    }
+
+    const updatedFields = {
+      firstName: firstName ?? user.firstName,
+      lastName: lastName ?? user.lastName,
+      profileImage,
+    };
+
+    await user.update(updatedFields);
+
+    res.status(200).json({
+      message: 'User updated successfully',
+      data: user,
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: error.message,
+    });
+  }
 };
 
 exports.deleteUser = async (req, res) => {
