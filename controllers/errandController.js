@@ -16,12 +16,10 @@ exports.createErrand = async (req, res) => {
             })
         }
         const newErrand = await errand.create({
-            Id: uuiv4(),
+            
             userId,
             title,
-    
             recieverNo,
-        
             description,
             pickupAddress,
             pickupContact,
