@@ -1,48 +1,59 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = require('../database/databases')
+const sequelize = require('../database/databases');
+const User = require('./users');
+const Errand = require('./errand');
 
 class RunnerApplication extends Model {}
 
 RunnerApplication.init(
   {
-  id: {
-     primaryKey: true,
+    id: {
+      primaryKey: true,
       allowNull: false,
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4
+      defaultValue: DataTypes.UUIDV4,
     },
-  runnerId: {
-     type: DataTypes.UUID,
-     allowNull: false
-  },
-  errandId: {
-    type: DataTypes.UUID,
-    allowNull: false
-  },
+    runnerId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Users', // References Users table
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    },
+    errandId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Errands', // References Errands table
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    },
+    message: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     status: {
-    type: DataTypes.ENUM(['Pending', 'Accepted', 'Rejected']),
-    allowNull: false,
-    defaultValue: 'Pending'
-  },
+      type: DataTypes.ENUM('Pending', 'Accepted', 'Rejected'),
+      allowNull: false,
+      defaultValue: 'Pending',
+    },
     bidPrice: {
       type: DataTypes.FLOAT,
-      allowNull: false
-  },
-    createdAt: {
-    allowNull: false,
-    type: DataTypes.DATE
-  },
-    updatedAt: {
-    allowNull: false,
-    type: DataTypes.DATE
-  }
+      allowNull: false,
+    },
   },
   {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'runnerApplications', // We need to choose the model name
-    timestamps: true
-  },
+    sequelize,
+    modelName: 'runnerApplication',
+    tableName: 'runnerApplications',
+    timestamps: true,
+  }
 );
+
 
 module.exports = RunnerApplication;

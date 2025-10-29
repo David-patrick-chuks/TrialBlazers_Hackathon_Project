@@ -1,48 +1,54 @@
 'use strict';
+const { UUIDV4 } = require('sequelize');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     // Create Wallets table
     await queryInterface.createTable('Wallets', {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
+        defaultValue: UUIDV4,
       },
       runnerId: {
         type: Sequelize.UUID,
         allowNull: false,
+        unique: true,
         references: { model: 'Users', key: 'id' },
-        unique: true
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       balance: {
         type: Sequelize.DECIMAL(15, 2),
         allowNull: false,
-        defaultValue: 0.00
+        defaultValue: 0.0,
       },
       currency: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: 'NGN'
+        defaultValue: 'NGN',
       },
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true
+        defaultValue: true,
       },
       lastTransactionAt: {
         type: Sequelize.DATE,
-        allowNull: true
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
     });
 
     // Create WalletTransactions table
@@ -50,55 +56,58 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
+        defaultValue: UUIDV4,
       },
       walletId: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'Wallets', key: 'id' }
+        references: { model: 'Wallets', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       amount: {
         type: Sequelize.DECIMAL(15, 2),
-        allowNull: false
+        allowNull: false,
       },
       type: {
-        type: Sequelize.ENUM(['credit', 'debit']),
-        allowNull: false
+        type: Sequelize.ENUM('credit', 'debit'),
+        allowNull: false,
       },
       description: {
         type: Sequelize.TEXT,
-        allowNull: true
+        allowNull: true,
       },
       reference: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
       },
       status: {
-        type: Sequelize.ENUM(['pending', 'completed', 'failed', 'cancelled']),
+        type: Sequelize.ENUM('pending', 'completed', 'failed', 'cancelled'),
         allowNull: false,
-        defaultValue: 'completed'
+        defaultValue: 'completed',
       },
       balanceBefore: {
         type: Sequelize.DECIMAL(15, 2),
-        allowNull: true
+        allowNull: true,
       },
       balanceAfter: {
         type: Sequelize.DECIMAL(15, 2),
-        allowNull: true
+        allowNull: true,
       },
       metadata: {
         type: Sequelize.JSON,
         allowNull: true,
-        defaultValue: {}
+        defaultValue: {},
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
+  allowNull: false,
+  type: Sequelize.DATE
+},
+updatedAt: {
+  allowNull: false,
+  type: Sequelize.DATE
+}
     });
 
     // Add indexes
@@ -109,8 +118,8 @@ module.exports = {
     await queryInterface.addIndex('WalletTransactions', ['status']);
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('WalletTransactions');
     await queryInterface.dropTable('Wallets');
-  }
+  },
 };

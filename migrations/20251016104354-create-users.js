@@ -1,3 +1,4 @@
+'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -10,13 +11,11 @@ module.exports = {
       },
       firstName: {
         type: Sequelize.STRING,
-        allowNull: false,
-        trim: true
+        allowNull: false
       },
       lastName: {
         type: Sequelize.STRING,
-        allowNull: false,
-        trim: true
+        allowNull: false
       },
       email: {
         type: Sequelize.STRING,
@@ -33,18 +32,11 @@ module.exports = {
       },
       profileImage: {
         type: Sequelize.TEXT,
-        allowNull: true,
-        get() {
-         const rawValue = this.getDataValue('profileImage');
-         return rawValue ? JSON.parse(rawValue) : null;
-       },
-        set(value) {
-       this.setDataValue('profileImage', JSON.stringify(value));
-       }
+        allowNull: true
       },
-        bio: {
-         type: Sequelize.TEXT,
-         allowNull: true,
+      bio: {
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       otp: {
         type: Sequelize.STRING,
@@ -56,55 +48,47 @@ module.exports = {
       },
       isVerified: {
         type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: false
       },
       rating: {
         type: Sequelize.FLOAT,
+        allowNull: false,
         defaultValue: 0
       },
       totalJobs: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         defaultValue: 0
       },
       isActive: {
         type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: true
       },
       isAdmin: {
         type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: false
       },
       otpVerified: {
         type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: false
       },
       token: {
-        defaultValue: 0,
-      },
-      isActive: {
-      type: Sequelize.BOOLEAN,
-      defaultValue: true,
-      },
-      isAdmin: {
-       type: Sequelize.BOOLEAN,
-        defaultValue: false
-      },
-      otpVerified: {
-       type: Sequelize.BOOLEAN,
-       defaultValue: false
-      },
-     token: {
         type: Sequelize.STRING,
+        allowNull: false,
         defaultValue: ''
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
+  allowNull: false,
+  type: Sequelize.DATE,
+},
+updatedAt: {
+  allowNull: false,
+  type: Sequelize.DATE,
+}
     });
   },
 

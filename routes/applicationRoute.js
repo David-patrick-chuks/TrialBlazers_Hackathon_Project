@@ -1,16 +1,30 @@
 const router = require('express').Router();
-const { applyForErrand, getErrandApplications, updateApplicationStatus, getRunnerApplications } = require('../controllers/applicationController');
+const {
+  applyForErrand,
+  getErrandApplications,
+  updateApplicationStatus,
+  getRunnerApplications,
+} = require('../controllers/applicationController');
 const { authenticated } = require('../middleware/authenticate');
 
 /**
  * @swagger
- * /api/v1/applications/apply:
+ * /api/v1/applications/apply/{errandId}:
  *   post:
  *     summary: Runner applies for an errand
  *     description: Allows a verified runner to apply for a specific errand by providing a bid price and message.
  *     tags: [Runner Applications]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: errandId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the errand the runner wants to apply for.
+ *         example: "2c1a2d0e-4410-4e23-8c60-d6b7e21e2f31"
  *     requestBody:
  *       required: true
  *       content:
@@ -18,14 +32,9 @@ const { authenticated } = require('../middleware/authenticate');
  *           schema:
  *             type: object
  *             required:
- *               - errandId
  *               - bidPrice
+ *               - message
  *             properties:
- *               errandId:
- *                 type: string
- *                 format: uuid
- *                 description: The ID of the errand the runner wants to apply for.
- *                 example: "2c1a2d0e-4410-4e23-8c60-d6b7e21e2f31"
  *               bidPrice:
  *                 type: number
  *                 format: float
@@ -33,7 +42,7 @@ const { authenticated } = require('../middleware/authenticate');
  *                 example: 1500
  *               message:
  *                 type: string
- *                 description: Optional message to the client explaining the application or offer.
+ *                 description: A short note or message to the client explaining the offer or motivation.
  *                 example: "I live nearby and can get this done within 2 hours."
  *     responses:
  *       201:
@@ -64,6 +73,9 @@ const { authenticated } = require('../middleware/authenticate');
  *                     bidPrice:
  *                       type: number
  *                       example: 1500
+ *                     message:
+ *                       type: string
+ *                       example: "I live nearby and can get this done within 2 hours."
  *                     status:
  *                       type: string
  *                       example: Pending
@@ -80,7 +92,7 @@ const { authenticated } = require('../middleware/authenticate');
  *               properties:
  *                 message:
  *                   type: string
- *                   example: You already applied for this errand
+ *                   example: You have already applied for this errand
  *       404:
  *         description: Errand not found.
  *         content:
@@ -94,7 +106,7 @@ const { authenticated } = require('../middleware/authenticate');
  *       500:
  *         description: Internal server error.
  */
-router.post('/apply', authenticated, applyForErrand);
+router.post('/apply/:errandId', authenticated, applyForErrand);
 
 /**
  * @swagger
@@ -133,28 +145,21 @@ router.post('/apply', authenticated, applyForErrand);
  *                       id:
  *                         type: string
  *                         format: uuid
- *                         example: "54a3bb40-8e16-421a-9c6f-9b6dff97b0e9"
  *                       runnerId:
  *                         type: string
  *                         format: uuid
- *                         example: "b47e8610-3e64-4b28-9cf3-cd7e3b2a8472"
  *                       errandId:
  *                         type: string
  *                         format: uuid
- *                         example: "2c1a2d0e-4410-4e23-8c60-d6b7e21e2f31"
  *                       bidPrice:
  *                         type: number
- *                         example: 1500
  *                       message:
  *                         type: string
- *                         example: "I live nearby and can complete this within 2 hours."
  *                       status:
  *                         type: string
- *                         example: Pending
  *                       createdAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2025-10-24T11:20:00.000Z"
  *                       runner:
  *                         type: object
  *                         properties:
@@ -169,14 +174,6 @@ router.post('/apply', authenticated, applyForErrand);
  *                             example: "jamesolu@gmail.com"
  *       404:
  *         description: Errand not found or no applications submitted.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "No applications found for this errand"
  */
 router.get('/errand/:errandId', authenticated, getErrandApplications);
 
@@ -197,7 +194,6 @@ router.get('/errand/:errandId', authenticated, getErrandApplications);
  *           type: string
  *           format: uuid
  *         description: The unique ID of the application to update
- *         example: "b48a2c13-2b64-4b5b-a624-cc87c44210f5"
  *     requestBody:
  *       required: true
  *       content:
@@ -214,64 +210,12 @@ router.get('/errand/:errandId', authenticated, getErrandApplications);
  *     responses:
  *       200:
  *         description: Application status updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Application accepted successfully"
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                       format: uuid
- *                       example: "b48a2c13-2b64-4b5b-a624-cc87c44210f5"
- *                     runnerId:
- *                       type: string
- *                       example: "dfc9a890-76bc-4c61-b2c1-b8828ec6ad03"
- *                     errandId:
- *                       type: string
- *                       example: "e1f8923c-0f4e-4b20-bd7e-57a40b49b92f"
- *                     status:
- *                       type: string
- *                       example: "Accepted"
- *                     bidPrice:
- *                       type: number
- *                       example: 2500
- *                     message:
- *                       type: string
- *                       example: "I can start immediately."
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2025-10-24T09:15:00.000Z"
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2025-10-24T10:00:00.000Z"
  *       400:
  *         description: Invalid status or bad request.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Invalid status"
  *       404:
  *         description: Application not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Application not found"
+ *       500:
+ *         description: Internal server error.
  */
 router.put('/:id/status', authenticated, updateApplicationStatus);
 
@@ -303,45 +247,31 @@ router.put('/:id/status', authenticated, updateApplicationStatus);
  *                       id:
  *                         type: string
  *                         format: uuid
- *                         example: "a7b43e7d-4c2d-4571-90c5-4c2db35c4423"
  *                       runnerId:
  *                         type: string
- *                         example: "e37b0a0b-3c16-47d0-9232-f8fba045d94a"
  *                       errandId:
  *                         type: string
- *                         example: "da8d5f12-56d7-4c23-b96f-3a3f812cf2bb"
  *                       bidPrice:
  *                         type: number
- *                         example: 5000
  *                       message:
  *                         type: string
- *                         example: "I can complete this errand within 2 hours."
  *                       status:
  *                         type: string
- *                         enum: [Pending, Accepted, Rejected]
- *                         example: "Pending"
  *                       createdAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2025-10-24T09:30:00.000Z"
- *                       updatedAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2025-10-24T10:00:00.000Z"
  *                       errand:
  *                         type: object
- *                         description: The errand details associated with this application.
  *                         properties:
  *                           id:
  *                             type: string
  *                             format: uuid
- *                             example: "da8d5f12-56d7-4c23-b96f-3a3f812cf2bb"
  *                           title:
  *                             type: string
  *                             example: "Deliver package to Lagos Island"
  *                           description:
  *                             type: string
- *                             example: "Pick up a parcel in Ikeja and deliver it to Lagos Island within 3 hours."
+ *                             example: "Pick up parcel from Ikeja and deliver to Lagos Island."
  *                           budget:
  *                             type: number
  *                             example: 10000
@@ -350,16 +280,7 @@ router.put('/:id/status', authenticated, updateApplicationStatus);
  *                             example: "Ikeja, Lagos"
  *       401:
  *         description: Unauthorized - missing or invalid token.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Unauthorized. Please provide a valid token."
  */
 router.get('/my-applications', authenticated, getRunnerApplications);
-
 
 module.exports = router;
