@@ -1,6 +1,6 @@
 const { resendCode, login, register, home, forgotPassword, resetPassword, verifyEmail, verifyResetPasswordOtp, changePassword, getOneUser, getAll, update, deleteUser, auth, user, success, failure, makeAdmin } = require('../controllers/userController');
 const { authenticated } = require('../middleware/authenticate');
-const { registerValidator, verifyValidator } = require('../middleware/validator');
+const { registerValidator, verifyValidator, resendValidator } = require('../middleware/validator');
 const upload = require('../middleware/multer');
 
 const router = require('express').Router();
@@ -196,7 +196,7 @@ router.post('/verify-otp', verifyValidator, verifyEmail);
  *                   type: string
  *                   example: user not found
  */
-router.post('/resend-code', resendCode);
+router.post('/resend-code', resendValidator, resendCode);
 
 /**
  * @swagger
@@ -274,55 +274,6 @@ router.post('/resend-code', resendCode);
  *       
  */
 router.post('/login', login);
-
-/**
- * @swagger
- * /api/v1/:
- *   get:
- *     summary: Home route (protected)
- *     description: Returns a welcome message for authenticated users. Requires a valid JWT token in the Authorization header.
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Welcome message returned successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Welcome Fasube, we are happy to have you here
- *       401:
- *         description: Missing, invalid, or expired token
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   examples:
- *                     missing:
- *                       summary: No token
- *                       value: Login required. No token provided.
- *                     invalid:
- *                       summary: Invalid token
- *                       value: Invalid or expired token
- *       404:
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: User not found
- */
-router.get('/', home);
 
 /**
  * @swagger

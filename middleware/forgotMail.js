@@ -38,7 +38,7 @@ return `
           <td style="height: 350px">
             <h1 style="font-size: 35px; font-weight: bold; margin: 0 0 10px;">Reset Password</h1>
             <h2 style="font-size: 20px; margin: 0 0 10px;">Hi ${firstName},</h2>
-            <p style="font-size: 17px; margin: 0 0 20px;">Here's your 6-digit code, enter it to reset your password and unlock the ErrandHive's fast delivery experience!</p>
+            <p style="font-size: 17px; margin: 0 0 20px;">Here's your 6-digit code, enter it to reset your password and unlock the ErrandHive's fast delivery experience! One-Time-Password(OTP) expires in 5 minutes</p>
             <h2 style="font-size: 35px; font-weight: bold; background: #c2cfd3; padding: 10px; border-radius: 5px; text-align: center;">${otp}</h2>
             <p style="font-size: 17px; margin: 20px 0px 10px 0px;">Need help? Reach out to our support team below.</p>
             <p style="font-size: 17px;">Thank you for choosing ErrandHive.</p>
