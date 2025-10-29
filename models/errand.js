@@ -1,9 +1,5 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../database/databases');
-const User = require('./users');
-const ErrandAssignment = require('./errandassignment');
-const Payment = require('./payment');
-const Review = require('./review');
 const { date } = require('joi');
 
 class Errand extends Model {}
@@ -25,13 +21,6 @@ Errand.init(
         type: DataTypes.STRING,
         allowNull: false,
       },
-      category:{
-        type: DataTypes.ENUM('accessories','food stuff','medicine','cream'),
-        allowNull:false,
-      
-        
-      },
-     
       recieverNo:{
         type:DataTypes.UUID,
         refrences:{model:'runnerId', key: 'id'}

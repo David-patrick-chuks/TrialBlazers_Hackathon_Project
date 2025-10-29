@@ -64,6 +64,7 @@ const {User, Errand, ErrandAssignment, Review, Payment} = sequelize.models;
 User.hasMany(Errand, {foreignKey: 'userId'})
 User.hasMany(ErrandAssignment, {foreignKey: 'runnerId'});
 User.hasMany(Review, {foreignKey: 'reviewerId'});
+
 Errand.belongsTo(User, {foreignKey: 'userId', as: 'poster'});
 Errand.hasMany(ErrandAssignment, {foreignKey: 'errandId'});
 Errand.hasOne(Payment, {foreignKey: 'errandId'});
