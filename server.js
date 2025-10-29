@@ -69,7 +69,7 @@ const swaggerDefinition = {
     contact: {
       name: 'ErrandHive',
       email: 'errand@gmail.com',
-      url: 'https://trialblazers-hackathon-project.onrender.com',
+      url: 'https://errandhive-project.onrender.com',
     },
   },
   servers: [
