@@ -1,27 +1,25 @@
-const { ECDH } = require('crypto');
 const errand = require('../models/errand')
 const user = require('../models/users')
 
-const { uuiv4 } = require('uuid')
-
 exports.createErrand = async (req, res) => {
     try {
-        const { userId, title, category, recieverNo, instruction, description, location, price } = req.body;
 
-        if (!userId || !title || !category || !recieverNo || !instruction || !description || !location || !price) {
+        const {userId,title, recieverNo, description,pickupAddress,pickupContact,price} = req.body;
+
+        if(!userId || !title ||!recieverNo ||  !description || !pickupAddress || !pickupContact || !price ){
+
             return res.status(404).json({
-                message: 'missing field is required'
+                message: 'kindly fill the required field'
             })
         }
         const newErrand = await errand.create({
-            Id: uuiv4(),
+            
             userId,
             title,
-            category,
             recieverNo,
-            instruction,
             description,
-            location,
+            pickupAddress,
+            pickupContact,
             price
         })
 
@@ -84,8 +82,9 @@ exports.getErrandById = async (req, res) => {
 
 exports.updateErrand = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { assignedTo, status, description, location, price } = req.body;
+
+        const {id} = req.params;
+        const {assignedTo, status,description,pickupAddress,pickupContact,price} = req.body;
 
         const errand = await errand.findByPK(id);
         if (!errand) {
@@ -96,10 +95,13 @@ exports.updateErrand = async (req, res) => {
 
         const update = await errand.update({
             status: status || errand.status,
-            assignedTo: assignedTo || errand.assignedTo,
-            price: price || errand.price,
-            location: location || errand.location,
-            description: description || errand.description,
+
+            assignedTo: assignedTo ||errand.assignedTo,
+            price: price ||errand.price,
+           
+            pickupAddress: pickupAddress|| errand.pickupAddress,
+            pickupContact: pickupContact|| errand.pickupContact,
+   description: description || errand.description,
 
 
         })
@@ -139,6 +141,7 @@ exports.deletedErrand = async (req, res) => {
         })
     }
 }
+
 
 
 

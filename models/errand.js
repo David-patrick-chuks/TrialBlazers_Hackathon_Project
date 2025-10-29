@@ -25,22 +25,17 @@ Errand.init(
         type:DataTypes.UUID,
         refrences:{model:'runnerId', key: 'id'}
       },
-      instruction:{
-        type:DataTypes.TEXT,
-        allowNull:false
-      },
-
       description: {
         type: DataTypes.TEXT,
         allowNull: false,
       },
-      status: {
-        type: DataTypes.ENUM('Pending', 'Accepted', 'Rejected', 'Cancelled'),
-        defaultValue: 'Pending'
+      pickupAddress:{
+        type:DataTypes.TEXT,
+        allowNull:false,
       },
-      location: {
-        type: DataTypes.STRING,
-        allowNull:false 
+      pickupContact:{
+        type:DataTypes.TEXT,
+        allowNull:false,
       },
       price: {
         type: DataTypes.FLOAT,
@@ -70,11 +65,13 @@ Errand.init(
       },
   },
   {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Errands', // We need to choose the model name
+   
+    sequelize,
+    modelName: 'Errands', 
     timestamps: true
   },
 );
+
+
 
 module.exports = Errand;
