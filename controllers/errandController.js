@@ -7,9 +7,9 @@ const { uuiv4 } = require('uuid')
 exports.createErrand = async (req, res) => {
     try {
 
-        const {userId,title,category, recieverNo, instruction,description,pickupAddress,pickupContact,price} = req.body;
+        const {userId,title, recieverNo, description,pickupAddress,pickupContact,price} = req.body;
 
-        if(!userId || !title || !category || !recieverNo ||  !instruction || !description || !pickupAddress || !pickupContact || !price ){
+        if(!userId || !title ||!recieverNo ||  !description || !pickupAddress || !pickupContact || !price ){
 
             return res.status(404).json({
                 message: 'kindly fill the required field'
@@ -19,9 +19,9 @@ exports.createErrand = async (req, res) => {
             Id: uuiv4(),
             userId,
             title,
-            category,
+    
             recieverNo,
-            instruction,
+        
             description,
             pickupAddress,
             pickupContact,

@@ -25,21 +25,12 @@ Errand.init(
         type: DataTypes.STRING,
         allowNull: false,
       },
-      category:{
-        type: DataTypes.ENUM('accessories','food stuff','medicine','cream','electronics','utilities'),
-        allowNull:false,
       
-        
-      },
-     
       recieverNo:{
         type:DataTypes.UUID,
         refrences:{model:'runnerId', key: 'id'}
       },
-      instruction:{
-        type:DataTypes.TEXT,
-        allowNull:false
-      },
+    
 
       description: {
         type: DataTypes.TEXT,
