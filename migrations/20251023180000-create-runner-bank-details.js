@@ -1,58 +1,62 @@
 'use strict';
+const { UUIDV4 } = require('sequelize');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     // Create RunnerBankDetails table
     await queryInterface.createTable('RunnerBankDetails', {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
+        defaultValue: UUIDV4,
       },
       runnerId: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'Users', key: 'id' }
+        references: { model: 'Users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       bankCode: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       bankName: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       accountNumber: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       accountName: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       isVerified: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: false
+        defaultValue: false,
       },
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true
+        defaultValue: true,
       },
       verificationDate: {
         type: Sequelize.DATE,
-        allowNull: true
+        allowNull: true,
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
+  allowNull: false,
+  type: Sequelize.DATE,
+},
+updatedAt: {
+  allowNull: false,
+  type: Sequelize.DATE,
+}
     });
 
     // Add indexes
@@ -62,7 +66,7 @@ module.exports = {
     await queryInterface.addIndex('RunnerBankDetails', ['isActive']);
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('RunnerBankDetails');
-  }
+  },
 };

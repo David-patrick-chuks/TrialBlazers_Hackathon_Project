@@ -2,22 +2,25 @@ const Application = require('../models/runnerapplication');
 const Errand = require('../models/errand');
 const User = require('../models/users');
 
-
 exports.applyForErrand = async (req, res) => {
   try {
-    const { errandId, bidPrice, message } = req.body;
+    const { bidPrice, message } = req.body;
+    const { errandId } = req.params; 
     const runnerId = req.user.id; 
 
+    // Check if errand exists
     const errand = await Errand.findByPk(errandId);
     if (!errand) {
       return res.status(404).json({ message: 'Errand not found' });
     }
 
+    // Prevent duplicate application
     const existingApp = await Application.findOne({ where: { runnerId, errandId } });
     if (existingApp) {
-      return res.status(400).json({ message: 'You already applied for this errand' });
+      return res.status(400).json({ message: 'You have already applied for this errand' });
     }
 
+    // Create new application
     const application = await Application.create({
       runnerId,
       errandId,
@@ -31,7 +34,7 @@ exports.applyForErrand = async (req, res) => {
       data: application,
     });
   } catch (error) {
-    console.error(error.message);
+    console.error('Error in applyForErrand:', error);
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
@@ -39,9 +42,15 @@ exports.applyForErrand = async (req, res) => {
 exports.getErrandApplications = async (req, res) => {
   try {
     const { errandId } = req.params;
+
     const applications = await Application.findAll({
       where: { errandId },
-      include: [{ model: User, as: 'runner', attributes: ['firstName', 'lastName', 'email'] }],
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'firstName', 'lastName', 'email'],
+        },
+      ],
     });
 
     res.status(200).json({
@@ -49,6 +58,7 @@ exports.getErrandApplications = async (req, res) => {
       data: applications,
     });
   } catch (error) {
+    console.error('Error in getErrandApplications:', error);
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
@@ -74,6 +84,7 @@ exports.updateApplicationStatus = async (req, res) => {
       data: application,
     });
   } catch (error) {
+    console.error('Error in updateApplicationStatus:', error);
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
@@ -81,9 +92,15 @@ exports.updateApplicationStatus = async (req, res) => {
 exports.getRunnerApplications = async (req, res) => {
   try {
     const runnerId = req.user.id;
+
     const applications = await Application.findAll({
       where: { runnerId },
-      include: [{ model: Errand, as: 'errand' }],
+      include: [
+        {
+          model: Errand,
+          attributes: ['id', 'title', 'description', 'price', 'status'],
+        },
+      ],
     });
 
     res.status(200).json({
@@ -91,6 +108,7 @@ exports.getRunnerApplications = async (req, res) => {
       data: applications,
     });
   } catch (error) {
+    console.error('Error in getRunnerApplications:', error);
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };

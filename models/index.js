@@ -45,7 +45,6 @@ module.exports = db;
 const modelDefiners = [
   require('./users'),
   require('./errand'),
-  require('./errandassignment'),
   require('./kyc'),
   require('./message'),
   require('./payment'),
@@ -53,19 +52,20 @@ const modelDefiners = [
   require('./wallet'),
   require('./wallettransaction'),
   require('./runnerbankdetails'),
+  require('./runnerapplication')
 ];
 
 for (const modelDefiner of modelDefiners) {
   modelDefiner(sequelize);
 }
 
-const {User, Errand, ErrandAssignment, Review, Payment} = sequelize.models; 
+const {User, Errand, RunnerApplication, Review, Payment} = sequelize.models; 
 
 User.hasMany(Errand, {foreignKey: 'userId'})
-User.hasMany(ErrandAssignment, {foreignKey: 'runnerId'});
+User.hasMany(RunnerApplication, {foreignKey: 'runnerId'});
 User.hasMany(Review, {foreignKey: 'reviewerId'});
 
 Errand.belongsTo(User, {foreignKey: 'userId', as: 'poster'});
-Errand.hasMany(ErrandAssignment, {foreignKey: 'errandId'});
+Errand.hasMany(RunnerApplication, {foreignKey: 'errandId'});
 Errand.hasOne(Payment, {foreignKey: 'errandId'});
 Errand.hasOne(Review, {foreignKey: 'errandId'});

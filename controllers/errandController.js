@@ -1,162 +1,149 @@
-const errand = require('../models/errand')
-const user = require('../models/users')
-const cloudinary = require('../config/cloudinary')
-const fs = require('fs')
+const Errand = require('../models/errand');
+const User = require('../models/users');
+const cloudinary = require('../config/cloudinary');
+const fs = require('fs');
 
 exports.createErrand = async (req, res) => {
-    try {
+  try {
+    const { title, description, pickupAddress, deliveryAddress, pickupContact, price } = req.body;
+    const file = req.file;
+    const user = req.user; 
 
-        const {title, description,pickupAddress,deliveryAddress,pickupContact,price} = req.body;
-        const file = req.file
-
-
-        if(!title ||  !description || !pickupAddress || !deliveryAddress || !pickupContact || !price ){
-
-            return res.status(404).json({
-                message: 'kindly fill the required field'
-            })
-        }
-        const cloudAttachments = await cloudinary.uploader.upload(file.path,{
-            folder: 'attachments',
-            public_id: `${id}-${Date.now()}`,
-            overWrite: true,
-        });
-       fs.unlinkSync(file.path)
-
-        const Image = {
-           publicId: result.public_id,
-           url: result.secure_url,
-        }
-        const newErrand = await errand.create({
-            
-            title,
-            description,
-            pickupAddress,
-            deliveryAddress,
-            pickupContact,
-            price,
-            attachments : Image
-        })
-
-        res.status(200).json({
-            message: 'created succefully',
-            data: newErrand
-        })
-    } catch (error) {
-        res.status(500).json({
-            message: 'internal server error for creating Errand',
-            error: error.message
-        })
+    if (!title || !description || !pickupAddress || !deliveryAddress || !pickupContact || !price) {
+      return res.status(400).json({ message: 'Kindly fill all required fields' });
     }
-}
+
+    let image = null;
+
+    if (file) {
+      const uploadResult = await cloudinary.uploader.upload(file.path, {
+        folder: 'attachments',
+        public_id: `attachment-${Date.now()}`,
+        overwrite: true,
+      });
+      fs.unlinkSync(file.path);
+
+      image = {
+        publicId: uploadResult.public_id,
+        url: uploadResult.secure_url,
+      };
+    }
+
+    const newErrand = await Errand.create({
+      userId: user.id, 
+      title,
+      description,
+      pickupAddress,
+      deliveryAddress,
+      pickupContact,
+      price,
+      attachments: image,
+    });
+
+    res.status(201).json({
+      message: 'Errand created successfully',
+      data: newErrand,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal server error while creating errand',
+      error: error.message,
+    });
+  }
+};
+
 
 exports.getAllErrands = async (req, res) => {
-    try {
-        const userErrand = await errand.findAll({
-            include: [{ model: user, attribute }],
-            order: [['createAt', 'DESC']]
-        })
-        res.status(200).json({
-            message: 'all errand ',
-            data: userErrand
-        })
+  try {
+    const errands = await Errand.findAll({
+      include: [{ model: User, attributes: ['id', 'fullname', 'email'] }],
+      order: [['createdAt', 'DESC']],
+    });
 
-    } catch (error) {
-        res.status(500).json({
-            message: 'internal server getting all',
-            error: error.message
-        })
-    }
-}
+    res.status(200).json({
+      message: 'All errands retrieved successfully',
+      data: errands,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal server error while fetching errands',
+      error: error.message,
+    });
+  }
+};
 
 exports.getErrandById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const errand = await errand.findByPK(id, {
-            includes: [{
-                model: user,
-                atributes: ['id', 'fullname', 'email']
-            }]
-        })
-        if (!errand) {
-            return res.status(404).json({
-                message: 'errand not found'
-            })
-        }
-        res.status(200).json({
-            message: 'errand gotten succefully',
-            data: errand
-        })
-    } catch (error) {
-        res.status(500).json({
-            message: 'internal server error getting errend by id',
-            error: error.message
-        })
+  try {
+    const { id } = req.params;
+    const foundErrand = await Errand.findByPk(id, {
+      include: [{ model: User, attributes: ['id', 'fullname', 'email'] }],
+    });
+
+    if (!foundErrand) {
+      return res.status(404).json({ message: 'Errand not found' });
     }
-}
+
+    res.status(200).json({
+      message: 'Errand retrieved successfully',
+      data: foundErrand,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal server error while getting errand by ID',
+      error: error.message,
+    });
+  }
+};
 
 exports.updateErrand = async (req, res) => {
-    try {
+  try {
+    const { id } = req.params;
+    const { assignedTo, status, description, pickupAddress, pickupContact, price } = req.body;
 
-        const {id} = req.params;
-        const {assignedTo, status,description,pickupAddress,pickupContact,price} = req.body;
-
-        const errand = await errand.findByPK(id);
-        if (!errand) {
-            return res.status(404).json({
-                message: 'errand not found'
-            })
-        }
-
-        const update = await errand.update({
-            status: status || errand.status,
-
-            assignedTo: assignedTo ||errand.assignedTo,
-            price: price ||errand.price,
-           
-            pickupAddress: pickupAddress|| errand.pickupAddress,
-            pickupContact: pickupContact|| errand.pickupContact,
-   description: description || errand.description,
-
-
-        })
-
-        res.status(200).json({
-            message: 'Errand updated successfully',
-            data: update
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            message: 'internal server error ',
-            error: error.message
-        })
+    const foundErrand = await Errand.findByPk(id);
+    if (!foundErrand) {
+      return res.status(404).json({ message: 'Errand not found' });
     }
-}
 
-exports.deletedErrand = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const errand = await errand.findByPK(id);
-        if (!errand) {
-            return res.status(404).json({
-                message: 'errand with this id is not found'
-            })
-        }
-        const errandDelete = await errand.destroy(errand);
-        res.status(200).json({
-            message: 'errand deleted successfully',
-            data: errandDelete
-        })
+    await foundErrand.update({
+      status: status || foundErrand.status,
+      assignedTo: assignedTo || foundErrand.assignedTo,
+      price: price || foundErrand.price,
+      pickupAddress: pickupAddress || foundErrand.pickupAddress,
+      pickupContact: pickupContact || foundErrand.pickupContact,
+      description: description || foundErrand.description,
+    });
 
-    } catch (error) {
-        res.status(500).json({
-            message: 'internal server error deleting errand',
-            error: error.message
-        })
+    res.status(200).json({
+      message: 'Errand updated successfully',
+      data: foundErrand,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal server error while updating errand',
+      error: error.message,
+    });
+  }
+};
+
+exports.deleteErrand = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const foundErrand = await Errand.findByPk(id);
+
+    if (!foundErrand) {
+      return res.status(404).json({ message: 'Errand not found' });
     }
-}
 
+    await foundErrand.destroy();
 
-
-
+    res.status(200).json({
+      message: 'Errand deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal server error while deleting errand',
+      error: error.message,
+    });
+  }
+};

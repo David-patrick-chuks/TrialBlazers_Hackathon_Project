@@ -1,5 +1,4 @@
 'use strict';
-
 const { UUIDV4 } = require('sequelize');
 
 /** @type {import('sequelize-cli').Migration} */
@@ -10,36 +9,46 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
-        defaultValue: UUIDV4
+        defaultValue: UUIDV4,
       },
       runnerId: {
         type: Sequelize.UUID,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       errandId: {
         type: Sequelize.UUID,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Errands', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       status: {
-        type: Sequelize.ENUM(['Pending', 'Completed', 'Cancelled']),
+        type: Sequelize.ENUM('Pending', 'Completed', 'Cancelled'),
         allowNull: false,
-        defaultValue: 'Pending'
+        defaultValue: 'Pending',
       },
       bidPrice: {
         type: Sequelize.FLOAT,
-        allowNull: false
+        allowNull: false,
+      },
+      message: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
+  allowNull: false,
+  type: Sequelize.DATE,
+},
+updatedAt: {
+  allowNull: false,
+  type: Sequelize.DATE,
+}
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('runnerapplications');
-  }
+  },
 };

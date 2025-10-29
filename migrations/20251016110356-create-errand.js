@@ -16,13 +16,6 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
-      recieverNo: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: { model: 'Users', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
       title: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -75,16 +68,14 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      },
+     createdAt: {
+  allowNull: false,
+  type: Sequelize.DATE,
+},
+updatedAt: {
+  allowNull: false,
+  type: Sequelize.DATE,
+}
     });
   },
 

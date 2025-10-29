@@ -9,7 +9,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:1010/api/v1/google/callback",
+      callbackURL: "https://errandhive-project.onrender.com/api/v1/google/callback",
       passReqToCallback: true,
     },
     async (req, accessToken, refreshToken, profile, done) => {

@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('payments', {
+    await queryInterface.createTable('Payments', {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -11,43 +11,57 @@ module.exports = {
       },
       payerId: {
         type: Sequelize.UUID,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       receiverId: {
         type: Sequelize.UUID,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       amount: {
         type: Sequelize.FLOAT,
         allowNull: false
       },
       description: {
-       type: Sequelize.TEXT,
-       allowNull: false
+        type: Sequelize.TEXT,
+        allowNull: false
       },
       transactionId: {
         type: Sequelize.STRING,
         allowNull: false
       },
       paymentStatus: {
-        type: Sequelize.ENUM(['Pending', 'Paid', 'Failed']),
-        allowNull: false
+        type: Sequelize.ENUM('Pending', 'Paid', 'Failed'),
+        allowNull: false,
+        defaultValue: 'Pending'
       },
       paymentMethod: {
-         type: Sequelize.STRING,
-         allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
+  allowNull: false,
+  type: Sequelize.DATE,
+},
+updatedAt: {
+  allowNull: false,
+  type: Sequelize.DATE,
+}
     });
+
+    // Optional indexes for better lookup performance
+    await queryInterface.addIndex('Payments', ['payerId']);
+    await queryInterface.addIndex('Payments', ['receiverId']);
+    await queryInterface.addIndex('Payments', ['transactionId']);
+    await queryInterface.addIndex('Payments', ['paymentStatus']);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('payments');
+    await queryInterface.dropTable('Payments');
   }
 };

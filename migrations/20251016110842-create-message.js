@@ -10,24 +10,34 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4
       },
       senderId: {
-        type: Sequelize.STRING
+        type: Sequelize.UUID, // use UUID for foreign keys
+        allowNull: false
       },
       receiverId: {
-        type: Sequelize.STRING
+        type: Sequelize.UUID,
+        allowNull: false
       },
       text: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT('long'), // supports large messages
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       }
+    }, {
+      engine: 'InnoDB'
     });
+
+    // Only index UUID columns for lookup
+    await queryInterface.addIndex('Messages', ['senderId']);
+    await queryInterface.addIndex('Messages', ['receiverId']);
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Messages');
   }
