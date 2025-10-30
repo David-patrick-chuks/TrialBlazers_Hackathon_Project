@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { createErrand, getAllErrands, getErrandById, updateErrand, deleteErrand } = require('../controllers/errandController');
 const { postErrandValidator } = require('../middleware/validator');
-const { authenticate } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware'); // multer config for file uploads
+const { authenticated } = require('../middleware/authenticate');
+const uploads = require('../middleware/multer'); // multer config for file uploads
 
 /**
  * @swagger
@@ -67,7 +67,7 @@ const upload = require('../middleware/uploadMiddleware'); // multer config for f
  *       500:
  *         description: Server error while creating errand
  */
-router.post('/create', authenticate, upload.single('attachments'), postErrandValidator, createErrand);
+router.post('/create', authenticated, uploads.single('attachments'), postErrandValidator, createErrand);
 
 
 /**
