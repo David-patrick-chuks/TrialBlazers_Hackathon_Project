@@ -4,7 +4,6 @@ const { UUIDV4 } = require('sequelize');
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Create Wallets table
     await queryInterface.createTable('Wallets', {
       id: {
         allowNull: false,
@@ -42,84 +41,18 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
-    });
-
-    // Create WalletTransactions table
-    await queryInterface.createTable('WalletTransactions', {
-      id: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: UUIDV4,
-      },
-      walletId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: { model: 'Wallets', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-      amount: {
-        type: Sequelize.DECIMAL(15, 2),
-        allowNull: false,
-      },
-      type: {
-        type: Sequelize.ENUM('credit', 'debit'),
-        allowNull: false,
-      },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      reference: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      status: {
-        type: Sequelize.ENUM('pending', 'completed', 'failed', 'cancelled'),
-        allowNull: false,
-        defaultValue: 'completed',
-      },
-      balanceBefore: {
-        type: Sequelize.DECIMAL(15, 2),
-        allowNull: true,
-      },
-      balanceAfter: {
-        type: Sequelize.DECIMAL(15, 2),
-        allowNull: true,
-      },
-      metadata: {
-        type: Sequelize.JSON,
-        allowNull: true,
-        defaultValue: {},
-      },
-      createdAt: {
-  allowNull: false,
-  type: Sequelize.DATE
-},
-updatedAt: {
-  allowNull: false,
-  type: Sequelize.DATE
-}
     });
 
     // Add indexes
     await queryInterface.addIndex('Wallets', ['runnerId'], { unique: true });
-    await queryInterface.addIndex('WalletTransactions', ['walletId']);
-    await queryInterface.addIndex('WalletTransactions', ['reference']);
-    await queryInterface.addIndex('WalletTransactions', ['type']);
-    await queryInterface.addIndex('WalletTransactions', ['status']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('WalletTransactions');
     await queryInterface.dropTable('Wallets');
   },
 };
